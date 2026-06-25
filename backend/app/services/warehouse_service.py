@@ -2,9 +2,19 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.warehouse import Warehouse
-from app.core.warehouse_access import check_warehouse_access
 
-def create_warehouse(db: Session, data, user):
+from app.core.warehouse_access import (
+    check_warehouse_access
+)
+
+
+# ---------------- CREATE WAREHOUSE ----------------
+
+def create_warehouse(
+    db: Session,
+    data,
+    user
+):
     warehouse = Warehouse(
         name=data.name,
         location=data.location,
@@ -18,30 +28,28 @@ def create_warehouse(db: Session, data, user):
 
     return warehouse
 
-def get_all_warehouses(db: Session):
-    return db.query(Warehouse).all()
+
+# ---------------- GET ALL ACTIVE WAREHOUSES ----------------
+
+def get_warehouses(
+    db: Session
+):
+    return db.query(Warehouse).filter(
+        Warehouse.is_active == True
+    ).all()
 
 
-def get_warehouse(db: Session, warehouse_id: int, user):
+# ---------------- GET WAREHOUSE ----------------
 
-    check_warehouse_access(db, user.id, warehouse_id)
-
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id
-    ).first()
-
-    if not warehouse:
-        raise HTTPException(status_code=404, detail="Not found")
-
-    return warehouse
-
-def update_warehouse(db: Session, warehouse_id: int, data, user):
-
+def get_warehouse(
+    db: Session,
+    warehouse_id: int,
+    user
+):
     check_warehouse_access(
         db,
         user.id,
-        warehouse_id,
-        required_roles=["admin", "manager"]
+        warehouse_id
     )
 
     warehouse = db.query(Warehouse).filter(
@@ -49,7 +57,41 @@ def update_warehouse(db: Session, warehouse_id: int, data, user):
     ).first()
 
     if not warehouse:
-        raise HTTPException(status_code=404, detail="Not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Warehouse not found"
+        )
+
+    return warehouse
+
+
+# ---------------- UPDATE WAREHOUSE ----------------
+
+def update_warehouse(
+    db: Session,
+    warehouse_id: int,
+    data,
+    user
+):
+    check_warehouse_access(
+        db,
+        user.id,
+        warehouse_id,
+        required_roles=[
+            "admin",
+            "manager"
+        ]
+    )
+
+    warehouse = db.query(Warehouse).filter(
+        Warehouse.id == warehouse_id
+    ).first()
+
+    if not warehouse:
+        raise HTTPException(
+            status_code=404,
+            detail="Warehouse not found"
+        )
 
     warehouse.name = data.name
     warehouse.location = data.location
@@ -61,24 +103,24 @@ def update_warehouse(db: Session, warehouse_id: int, data, user):
     return warehouse
 
 
-def delete_warehouse(db: Session, warehouse_id: int, user):
+# ---------------- SOFT DELETE WAREHOUSE ----------------
 
-    check_warehouse_access(
+def delete_warehouse(
+    db: Session,
+    warehouse_id: int,
+    user
+):
+    warehouse = get_warehouse(
         db,
-        user.id,
         warehouse_id,
-        required_roles=["admin"]
+        user
     )
 
-    warehouse = db.query(Warehouse).filter(
-        Warehouse.id == warehouse_id
-    ).first()
+    warehouse.is_active = False
 
-    if not warehouse:
-        raise HTTPException(status_code=404, detail="Not found")
-
-    db.delete(warehouse)
     db.commit()
+    db.refresh(warehouse)
 
-    return {"message": "Warehouse deleted"}
-
+    return {
+        "message": "Warehouse deactivated successfully"
+    }

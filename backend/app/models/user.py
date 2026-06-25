@@ -15,7 +15,7 @@ class User(Base):
 
     password_hash = Column(String(255), nullable=False)
 
-    role = Column(String(50), default="staff")
+    role = Column(String(50), nullable=False)
 
     created_at = Column(
         DateTime(timezone=True),

@@ -35,38 +35,45 @@ def get_warehouses(
     db: Session = Depends(get_db),
    user = Depends(get_current_user)
 ):
-    return warehouse_service.get_all_warehouses(db)
+    return warehouse_service.get_warehouses(db)
 
 
 # ---------------- GET BY ID ----------------
-
-@router.get("/{warehouse_id}", response_model=WarehouseResponse)
+@router.get("/{warehouse_id}")
 def get_warehouse(
     warehouse_id: int,
     db: Session = Depends(get_db),
-   user = Depends(get_current_user)
+    user = Depends(get_current_user)
 ):
-    return warehouse_service.get_warehouse(db, warehouse_id)
-
+    return warehouse_service.get_warehouse(
+        db,
+        warehouse_id,
+        user
+    )
 
 # ---------------- UPDATE ----------------
-
-@router.put("/{warehouse_id}", response_model=WarehouseResponse)
+@router.put("/{warehouse_id}")
 def update_warehouse(
     warehouse_id: int,
     data: WarehouseUpdate,
     db: Session = Depends(get_db),
-   user = Depends(get_current_user)
+    user = Depends(get_current_user)
 ):
-    return warehouse_service.update_warehouse(db, warehouse_id, data)
-
-
+    return warehouse_service.update_warehouse(
+        db,
+        warehouse_id,
+        data,
+        user
+    )
 # ---------------- DELETE ----------------
-
 @router.delete("/{warehouse_id}")
 def delete_warehouse(
     warehouse_id: int,
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
-    return warehouse_service.delete_warehouse(db, warehouse_id)
+    return warehouse_service.delete_warehouse(
+        db,
+        warehouse_id,
+        user
+    )

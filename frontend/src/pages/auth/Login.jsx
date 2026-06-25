@@ -1,91 +1,166 @@
 import { useState } from "react";
-import { Box, TextField, Button, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
 import { loginUser } from "../../api/auth.api";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleLogin = async () => {
+    setError("");
+
+    if (!form.email.trim() || !form.password.trim()) {
+      setError("Please enter email and password.");
+      return;
+    }
+
     try {
-      const res = await loginUser({ email, password });
+      setLoading(true);
+
+      const res = await loginUser(form);
 
       localStorage.setItem("token", res.access_token);
+      localStorage.setItem("role", res.role);
 
-      navigate("/");
+      if (res.role === "admin") {
+        navigate("/admin");
+      } else if (res.role === "manager") {
+        navigate("/manager");
+      } else {
+        navigate("/staff");
+      }
     } catch (err) {
-      alert("Login failed");
+      setError("Invalid email or password.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
-      bgcolor="#f5f5f5"
-    >
-      <Paper
-        sx={{
-          p: 4,
-          width: 350,
-          borderRadius: 3,
-          boxShadow: 5,
-          position: "relative"
-        }}
+    <>
+      <Typography
+        variant="h4"
+        fontWeight={800}
+        mb={1}
+        textAlign="center"
       >
+        Welcome Back
+      </Typography>
 
-        {/* TITLE WITH LINE EFFECT */}
-        <Typography variant="h5" mb={2} sx={{ fontWeight: 600 }}>
-          Login
-        </Typography>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        mb={3}
+        textAlign="center"
+      >
+        Sign in to continue
+      </Typography>
 
-        <Box
-          sx={{
-            width: "100%",
-            height: "2px",
-            background: "linear-gradient(to right, #1976d2, transparent)",
-            mb: 3,
-            borderRadius: 2
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Box sx={{ display: "grid", gap: 2 }}>
+        <TextField
+          label="Email Address"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          fullWidth
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleLogin();
+            }
           }}
         />
 
         <TextField
-          fullWidth
-          label="Email"
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <TextField
-          fullWidth
           label="Password"
-          type="password"
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          type={showPassword ? "text" : "password"}
+          value={form.password}
+          onChange={handleChange}
+          fullWidth
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleLogin();
+            }
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
+                >
+                  {showPassword ? (
+                    <VisibilityOff />
+                  ) : (
+                    <Visibility />
+                  )}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
 
         <Button
-          fullWidth
           variant="contained"
-          sx={{
-            mt: 2,
-            py: 1.2,
-            borderRadius: 2,
-            fontWeight: 600
-          }}
+          size="large"
           onClick={handleLogin}
+          disabled={loading}
+          sx={{
+            mt: 1,
+            py: 1.5,
+            borderRadius: 2,
+            fontWeight: 700,
+          }}
         >
-          Login
+          {loading ? (
+            <>
+              <CircularProgress
+                size={20}
+                sx={{ mr: 1 }}
+              />
+              Signing In...
+            </>
+          ) : (
+            "Sign In"
+          )}
         </Button>
-
-      </Paper>
-    </Box>
+      </Box>
+    </>
   );
 }

@@ -8,7 +8,7 @@ class WarehouseCreate(BaseModel):
     name: str
     location: str
     capacity: int
-
+    
 
 # ✏️ UPDATE WAREHOUSE (INPUT)
 class WarehouseUpdate(BaseModel):
@@ -25,6 +25,7 @@ class WarehouseResponse(BaseModel):
     capacity: int
     created_by: int
     created_at: datetime
-
+    is_active: bool
     class Config:
         from_attributes = True
+        

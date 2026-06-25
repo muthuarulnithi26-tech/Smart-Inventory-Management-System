@@ -1,46 +1,60 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 import RoleRoute from "../components/RoleRoute";
+import RoleHomeRedirect from "../components/RoleHomeRedirect";
 
-// Layout
-import DashboardLayout from "../layouts/DashboardLayout";
 import AuthLayout from "../layouts/AuthLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
+import AdminLayout from "../layouts/AdminLayout";
+import ManagerLayout from "../layouts/ManagerLayout";
+import StaffLayout from "../layouts/StaffLayout";
 
-// Auth pages
 import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
 
-// Dashboard
-import Home from "../pages/dashboard/Home";
-
-// Orders
-import OrdersList from "../pages/orders/OrdersList";
-import OrderCreate from "../pages/orders/OrderCreate";
-import OrderDetails from "../pages/orders/OrderDetails";
-
-// Stock
-import StockPage from "../pages/stock/StockPage";
-
-// Products & Customers
-import Products from "../pages/products/Products";
-import Customers from "../pages/customers/Customers";
-
-// Admin
 import AdminDashboard from "../pages/admin/AdminDashboard";
-import OrdersApproval from "../pages/admin/OrdersApproval";
+import Warehouses from "../pages/admin/warehouses/Warehouses";
+import Managers from "../pages/admin/managers/Managers";
+
+import StaffManagement from "../pages/manager/StaffManagement";
+import OrderApproval from "../pages/manager/OrderApproval";
+import ManagerDashboard from "../pages/manager/ManagerDashboard";
+import ManagerStock from "../pages/manager/Stock";
+import ManagerProducts from "../pages/manager/Products";
+import ManagerShipments from "../pages/manager/Shipments";
+import ManagerReports from "../pages/manager/Reports";
+
+import StaffDashboard from "../pages/staff/StaffDashboard";
+import StaffCustomers from "../pages/staff/Customers";
+import StaffProducts from "../pages/staff/products";
+import StaffOrders from "../pages/staff/Orders";
+import StaffCreateOrder from "../pages/staff/CreateOrder";
+import StaffStock from "../pages/staff/Stock";
+import OrdersList from "../pages/staff/OrdersList";
+// import OrderCreate from "../pages/orders/OrderCreate";
+// import OrderDetails from "../pages/orders/OrderDetails";
+
+import StockPage from "../pages/stock/StockPage";
+import Products from "../pages/products/Products";
+import ShipmentsList from "../pages/shipments/ShipmentsList";
+import ReportsDashboard from "../pages/reports/ReportsDashboard";
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* AUTH */}
+      <Route
+        path="/login"
+        element={
+          <AuthLayout>
+            <Login />
+          </AuthLayout>
+        }
+      />
 
-      {/* AUTH ROUTES */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Route>
+      <Route path="/logout" element={<Navigate to="/login" replace />} />
 
-      {/* MAIN DASHBOARD */}
+      {/* MAIN PROTECTED AREA */}
       <Route
         path="/"
         element={
@@ -49,89 +63,69 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-
-        {/* HOME */}
-        <Route index element={<Home />} />
-
-        {/* STOCK */}
-        <Route
-          path="stock"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager", "staff"]}>
-              <StockPage />
-            </RoleRoute>
-          }
-        />
-
-        {/* PRODUCTS */}
-        <Route
-          path="products"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager"]}>
-              <Products />
-            </RoleRoute>
-          }
-        />
-
-        {/* CUSTOMERS */}
-        <Route
-          path="customers"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager"]}>
-              <Customers />
-            </RoleRoute>
-          }
-        />
+        {/* <Route index element={<RoleHomeRedirect />} /> */}
 
         {/* ORDERS */}
-        <Route
-          path="orders"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager"]}>
-              <OrdersList />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="orders/create"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager"]}>
-              <OrderCreate />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="orders/:id"
-          element={
-            <RoleRoute allowedRoles={["admin", "manager"]}>
-              <OrderDetails />
-            </RoleRoute>
-          }
-        />
-
-        {/* ADMIN */}
-        <Route
-          path="admin"
-          element={
-            <RoleRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
-            </RoleRoute>
-          }
-        />
-
-        <Route
-          path="admin/orders-approval"
-          element={
-            <RoleRoute allowedRoles={["admin"]}>
-              <OrdersApproval />
-            </RoleRoute>
-          }
-        />
-
+       
       </Route>
 
+      {/* MANAGER AREA */}
+      <Route
+        path="/manager/*"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["manager"]}>
+              <ManagerLayout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<ManagerDashboard />} />
+        <Route path="dashboard" element={<ManagerDashboard />} />
+        <Route path="staff" element={<StaffManagement />} />
+        <Route path="orders-approval" element={<OrderApproval />} />
+        <Route path="stock" element={<StockPage />} />
+        <Route path="products" element={<Products />} />
+        <Route path="shipments" element={<ShipmentsList />} />
+        <Route path="reports" element={<ReportsDashboard />} />
+      </Route>
+
+      {/* STAFF AREA */}
+      <Route
+        path="/staff"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["staff"]}>
+              <StaffLayout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<StaffDashboard />} />
+        <Route path="customers" element={<StaffCustomers />} />
+        <Route path="products" element={<StaffProducts />} />
+        <Route path="orders" element={<StaffOrders />} />
+        <Route path="orders/create" element={<StaffCreateOrder />} />
+        <Route path="stock" element={<StaffStock />} />
+      </Route>
+
+      {/* ADMIN AREA */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={["admin"]}>
+              <AdminLayout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="warehouses" element={<Warehouses />} />
+        <Route path="managers" element={<Managers />} />
+        <Route path="reports" element={<ReportsDashboard />} />
+      </Route>
     </Routes>
   );
 }

@@ -8,7 +8,7 @@ from app.schemas.user import UserCreate, UserResponse
 from app.schemas.user import UserLogin
 from app.core.security import verify_password, create_access_token
 
-from app.schemas.user import UserResponse
+# from app.schemas.user import UserResponse
 from app.core.deps import get_current_user
 
 
@@ -18,39 +18,39 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/register",
-    response_model=UserResponse
-)
-def register_user(
-    user: UserCreate,
-    db: Session = Depends(get_db)
-):
+# @router.post(
+#     "/register",
+#     response_model=UserResponse
+# )
+# def register_user(
+#     user: UserCreate,
+#     db: Session = Depends(get_db)
+# ):
 
-    existing_user = (
-        db.query(User)
-        .filter(User.email == user.email)
-        .first()
-    )
+#     existing_user = (
+#         db.query(User)
+#         .filter(User.email == user.email)
+#         .first()
+#     )
 
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
+#     if existing_user:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Email already registered"
+#         )
 
-    new_user = User(
-        name=user.name,
-        email=user.email,
-        password_hash=hash_password(user.password),
-        role="staff"
-    )
+#     new_user = User(
+#         name=user.name,
+#         email=user.email,
+#         password_hash=hash_password(user.password),
+#         role="staff"
+#     )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+#     db.add(new_user)
+#     db.commit()
+#     db.refresh(new_user)
 
-    return new_user
+#     return new_user
 
 @router.post("/login")
 def login_user(
@@ -85,7 +85,8 @@ def login_user(
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "role": db_user.role
     }
 @router.get(
     "/me",

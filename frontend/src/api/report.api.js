@@ -1,19 +1,25 @@
 import api from "./axios";
 
-// monthly revenue
-export const getMonthlyRevenue = async (month, year) => {
-  const res = await api.get(`/reports/monthly?month=${month}&year=${year}`);
+// Admin dashboard stats
+export const getAdminReport = async () => {
+  const res = await api.get("/reports/admin");
   return res.data;
 };
 
-// shipment profit
-export const getShipmentProfit = async (id) => {
-  const res = await api.get(`/reports/shipment/${id}/profit`);
+// Manager warehouse report
+export const getManagerReport = async () => {
+  const res = await api.get("/reports/manager");
   return res.data;
 };
 
-// warehouse report
-export const getWarehouseReport = async (id) => {
-  const res = await api.get(`/reports/warehouse/${id}`);
+// Stock movement report
+export const getStockReport = async () => {
+  const res = await api.get("/reports/stock");
+  return res.data;
+};
+
+// Order report
+export const getOrderReport = async () => {
+  const res = await api.get("/reports/orders");
   return res.data;
 };

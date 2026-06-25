@@ -1,13 +1,16 @@
 import api from "./axios";
 
-export const getDashboardData = async () => {
-  const orders = await api.get("/orders");
-  const shipments = await api.get("/shipments");
-  const revenue = await api.get("/reports/monthly?month=6&year=2026");
+export const getAdminDashboard = async () => {
+  const res = await api.get("/dashboard/admin");
+  return res.data;
+};
 
-  return {
-    orders: orders.data,
-    shipments: shipments.data,
-    revenue: revenue.data
-  };
+export const getManagerDashboard = async () => {
+  const res = await api.get("/dashboard/manager");
+  return res.data;
+};
+
+export const getStaffDashboard = async () => {
+  const res = await api.get("/dashboard/staff");
+  return res.data;
 };

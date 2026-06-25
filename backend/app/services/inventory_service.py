@@ -82,3 +82,26 @@ def remove_stock(db: Session, warehouse_id: int, product_id: int, quantity: int,
     db.refresh(item)
 
     return item
+
+from app.models.product import Product
+
+def get_inventory(db: Session, warehouse_id: int):
+    items = db.query(Inventory).filter(
+        Inventory.warehouse_id == warehouse_id
+    ).all()
+
+    result = []
+    for item in items:
+        product = db.query(Product).filter(
+            Product.id == item.product_id
+        ).first()
+
+        result.append({
+            "id": item.id,
+            "warehouse_id": item.warehouse_id,
+            "product_id": item.product_id,
+            "product_name": product.name if product else None,
+            "quantity": item.quantity
+        })
+
+    return result

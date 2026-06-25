@@ -1,54 +1,30 @@
+from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.models.shipment import Shipment
-from app.models.container import Container
-from app.models.dealer import Dealer
+from app.models.order import Order
 
 
-# ---------------- CREATE SHIPMENT ----------------
+def create_shipment(db: Session, user, order_id: int, vehicle_type: str):
 
-def create_shipment(
-    db,
-    data,
-    user
-):
-    container = db.query(Container).filter(
-        Container.id == data.container_id
-    ).first()
+    if user.role != "manager":
+        raise HTTPException(status_code=403, detail="Only manager can create shipment")
 
-    if not container:
-        raise HTTPException(
-            status_code=404,
-            detail="Container not found"
-        )
+    order = db.query(Order).filter(Order.id == order_id).first()
 
-    dealer = db.query(Dealer).filter(
-        Dealer.id == data.dealer_id
-    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
 
-    if not dealer:
-        raise HTTPException(
-            status_code=404,
-            detail="Dealer not found"
-        )
-
-    existing_invoice = db.query(Shipment).filter(
-        Shipment.invoice_number == data.invoice_number
-    ).first()
-
-    if existing_invoice:
-        raise HTTPException(
-            status_code=400,
-            detail="Invoice number already exists"
-        )
+    if order.status != "APPROVED":
+        raise HTTPException(status_code=400, detail="Order not approved yet")
 
     shipment = Shipment(
-        container_id=data.container_id,
-        dealer_id=data.dealer_id,
-        invoice_number=data.invoice_number,
-        invoice_amount=data.invoice_amount,
-        remarks=data.remarks,
-        created_by=user.id
+        order_id=order_id,
+        warehouse_id=user.id,  # later replaced with warehouse mapping
+        created_by=user.id,
+        status="PENDING",
+        vehicle_type=vehicle_type,
+        tracking_number=f"TRK-{order_id}-{user.id}"
     )
 
     db.add(shipment)
@@ -57,66 +33,19 @@ def create_shipment(
 
     return shipment
 
+def update_shipment_status(db: Session, user, shipment_id: int, status: str):
 
-# ---------------- GET ALL SHIPMENTS ----------------
+    if user.role != "manager":
+        raise HTTPException(status_code=403, detail="Only manager can update shipment")
 
-def get_all_shipments(db):
-
-    return db.query(Shipment).all()
-
-
-# ---------------- GET SHIPMENT BY ID ----------------
-
-def get_shipment_by_id(
-    db,
-    shipment_id
-):
-    shipment = db.query(Shipment).filter(
-        Shipment.id == shipment_id
-    ).first()
+    shipment = db.query(Shipment).filter(Shipment.id == shipment_id).first()
 
     if not shipment:
-        raise HTTPException(
-            status_code=404,
-            detail="Shipment not found"
-        )
+        raise HTTPException(status_code=404, detail="Shipment not found")
 
-    return shipment
-
-
-# ---------------- MARK SHIPMENT AS PAID ----------------
-
-def mark_shipment_paid(
-    db,
-    shipment_id
-):
-    shipment = get_shipment_by_id(
-        db,
-        shipment_id
-    )
-
-    shipment.payment_status = "paid"
+    shipment.status = status
 
     db.commit()
-    db.refresh(shipment)
 
     return shipment
 
-
-# ---------------- CANCEL SHIPMENT ----------------
-
-def cancel_shipment(
-    db,
-    shipment_id
-):
-    shipment = get_shipment_by_id(
-        db,
-        shipment_id
-    )
-
-    shipment.payment_status = "cancelled"
-
-    db.commit()
-    db.refresh(shipment)
-
-    return shipment

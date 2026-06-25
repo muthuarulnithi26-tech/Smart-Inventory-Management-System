@@ -26,4 +26,3 @@ class ContainerItem(Base):
         Integer,
         nullable=False
     )
-    
