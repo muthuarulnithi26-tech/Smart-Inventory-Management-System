@@ -1,36 +1,56 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   Box,
+  Typography,
+  Grid,
   Card,
   CardContent,
-  Grid,
-  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  InputAdornment,
   Chip,
+  InputAdornment,
   CircularProgress,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 
-import api from "../../api/axios";
+import {
+  getProducts,
+  createProduct,
+} from "../../api/product.api";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+  const [form, setForm] = useState({
+    name: "",
+    sku: "",
+    unit: "",
+    purchase_price: "",
+    selling_price: "",
+  });
+
   useEffect(() => {
-    load();
+    loadProducts();
   }, []);
 
-  const load = async () => {
+  const loadProducts = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/products");
-      setProducts(Array.isArray(res.data) ? res.data : []);
+      const data = await getProducts();
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
       setProducts([]);
@@ -39,9 +59,8 @@ export default function Products() {
     }
   };
 
-  const filteredProducts = useMemo(() => {
+  const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-
     if (!q) return products;
 
     return products.filter((p) =>
@@ -49,168 +68,266 @@ export default function Products() {
     );
   }, [products, search]);
 
-  const totalProfit = useMemo(() => {
-    return products.reduce((sum, p) => {
-      return sum + ((p.selling_price || 0) - (p.purchase_price || 0));
-    }, 0);
-  }, [products]);
+  const handleCreate = async () => {
+    await createProduct(form);
+    setOpen(false);
+    setForm({
+      name: "",
+      sku: "",
+      unit: "",
+      purchase_price: "",
+      selling_price: "",
+    });
+    loadProducts();
+  };
 
-  if (loading) {
+  const totalProfit = filtered.reduce((acc, p) => {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
-        <CircularProgress />
-      </Box>
+      acc +
+      (Number(p.selling_price || 0) - Number(p.purchase_price || 0))
     );
-  }
+  }, 0);
 
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
 
       {/* HEADER */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight={800}>
-          Products
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
+        {/* <Box>
+          <Typography variant="h5" fontWeight={800}>
+            Product Management
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage inventory products and pricing
+          </Typography>
+        </Box> */}
 
-        <Typography variant="body2" color="text.secondary">
-          Manage all inventory products and pricing
-        </Typography>
+        {/* <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpen(true)}
+        >
+          Add Product
+        </Button> */}
       </Box>
 
-      {/* SEARCH + STATS */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      {/* SEARCH + KPI */}
+      <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            placeholder="Search by name, SKU, unit..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+        <TextField
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ flex: 1, minWidth: 250 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Inventory2Icon color="primary" />
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Total Products
-                </Typography>
-                <Typography variant="h6" fontWeight={800}>
-                  {products.length}
-                </Typography>
+        <Card sx={{ minWidth: 180 }}>
+          <CardContent>
+            <Typography color="text.secondary">
+              Total Products
+            </Typography>
+            <Typography variant="h6" fontWeight={800}>
+              {filtered.length}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ minWidth: 180 }}>
+          <CardContent>
+            <Typography color="text.secondary">
+              Total Profit
+            </Typography>
+            <Typography variant="h6" fontWeight={800} color="success.main">
+              ₹{totalProfit}
+            </Typography>
+          </CardContent>
+        </Card>
+
+      </Box>
+        {/* LOADING */}
+{loading ? (
+  <Box
+    sx={{
+      height: "40vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+) : (
+  <>
+    {/* TABLE VIEW */}
+    <Box sx={{ overflowX: "auto" }}>
+
+      <Box
+        component="table"
+        sx={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: 800,
+          backgroundColor: "#fff",
+          borderRadius: 2,
+          boxShadow: 2,
+          overflow: "hidden",
+        }}
+      >
+
+        {/* HEADER */}
+        <Box component="thead" sx={{ backgroundColor: "#f1f5f9" }}>
+          <Box component="tr">
+            {["Name", "SKU", "Unit", "Purchase", "Selling", "Profit"].map((h) => (
+              <Box
+                component="th"
+                key={h}
+                sx={{
+                  textAlign: "left",
+                  padding: "12px",
+                  fontWeight: 700,
+                  color: "#334155",
+                  borderBottom: "1px solid #e2e8f0",
+                }}
+              >
+                {h}
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <TrendingUpIcon color="success" />
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Total Profit
-                </Typography>
-                <Typography variant="h6" fontWeight={800}>
-                  ₹{totalProfit}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-      </Grid>
-
-      {/* EMPTY STATE */}
-      {filteredProducts.length === 0 ? (
-        <Box sx={{ textAlign: "center", mt: 8 }}>
-          <Typography variant="h6" color="text.secondary">
-            No products found
-          </Typography>
+            ))}
+          </Box>
         </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {filteredProducts.map((p) => {
+
+        {/* BODY */}
+        <Box component="tbody">
+          {filtered.map((p) => {
             const profit =
-              (p.selling_price || 0) - (p.purchase_price || 0);
+              Number(p.selling_price || 0) -
+              Number(p.purchase_price || 0);
 
             return (
-              <Grid item xs={12} md={4} key={p.id}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    transition: "0.2s",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: 4,
-                    },
-                  }}
-                >
-                  <CardContent>
+              <Box
+                component="tr"
+                key={p.id}
+                sx={{
+                  "&:hover": { backgroundColor: "#f8fafc" },
+                  borderBottom: "1px solid #e2e8f0",
+                }}
+              >
+                <Box component="td" sx={{ padding: "12px", fontWeight: 600 }}>
+                  {p.name}
+                </Box>
 
-                    {/* HEADER */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1,
-                      }}
-                    >
-                      <Typography variant="h6" fontWeight={700}>
-                        {p.name}
-                      </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  {p.sku}
+                </Box>
 
-                      <Chip
-                        label={p.unit}
-                        size="small"
-                        color="primary"
-                      />
-                    </Box>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  {p.unit}
+                </Box>
 
-                    <Typography variant="body2" color="text.secondary">
-                      SKU: {p.sku}
-                    </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  ₹{p.purchase_price}
+                </Box>
 
-                    <Box sx={{ mt: 2 }}>
-                      <Typography>
-                        Purchase: ₹{p.purchase_price}
-                      </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  ₹{p.selling_price}
+                </Box>
 
-                      <Typography>
-                        Selling: ₹{p.selling_price}
-                      </Typography>
-
-                      <Typography
-                        sx={{
-                          mt: 1,
-                          fontWeight: 800,
-                          color:
-                            profit >= 0
-                              ? "success.main"
-                              : "error.main",
-                        }}
-                      >
-                        Profit: ₹{profit}
-                      </Typography>
-                    </Box>
-
-                  </CardContent>
-                </Card>
-              </Grid>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  <Typography
+                    fontWeight={700}
+                    color={profit >= 0 ? "success.main" : "error.main"}
+                  >
+                    ₹{profit}
+                  </Typography>
+                </Box>
+              </Box>
             );
           })}
-        </Grid>
-      )}
+        </Box>
+      </Box>
+    </Box>
+
+    {/* EMPTY STATE */}
+    {filtered.length === 0 && (
+      <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Typography color="text.secondary">
+          No products found
+        </Typography>
+      </Box>
+    )}
+  </>
+)}
+
+      {/* DIALOG */}
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
+        <DialogTitle>Add Product</DialogTitle>
+
+        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+          <TextField
+            label="Name"
+            value={form.name}
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value })
+            }
+          />
+
+          <TextField
+            label="SKU"
+            value={form.sku}
+            onChange={(e) =>
+              setForm({ ...form, sku: e.target.value })
+            }
+          />
+
+          <TextField
+            label="Unit"
+            value={form.unit}
+            onChange={(e) =>
+              setForm({ ...form, unit: e.target.value })
+            }
+          />
+
+          <TextField
+            label="Purchase Price"
+            type="number"
+            value={form.purchase_price}
+            onChange={(e) =>
+              setForm({ ...form, purchase_price: e.target.value })
+            }
+          />
+
+          <TextField
+            label="Selling Price"
+            type="number"
+            value={form.selling_price}
+            onChange={(e) =>
+              setForm({ ...form, selling_price: e.target.value })
+            }
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </Box>
   );

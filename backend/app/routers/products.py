@@ -16,7 +16,7 @@ router = APIRouter(prefix="/products", tags=["Products"])
 
 
 # ---------------- CREATE PRODUCT ----------------
-@router.post("/products")
+@router.post("/")
 def create_product(
     data: ProductCreate,
     db: Session = Depends(get_db),
@@ -25,7 +25,7 @@ def create_product(
     return product_service.create_product(db, data, current_user)
 
 # ---------------- GET ALL PRODUCTS ----------------
-@router.get("/products")
+@router.get("/")
 def get_products(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)

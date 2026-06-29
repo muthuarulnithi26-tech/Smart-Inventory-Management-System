@@ -160,107 +160,118 @@ export default function Products() {
         </Card>
 
       </Box>
+        {/* LOADING */}
+{loading ? (
+  <Box
+    sx={{
+      height: "40vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+) : (
+  <>
+    {/* TABLE VIEW */}
+    <Box sx={{ overflowX: "auto" }}>
 
-      {/* LOADING */}
-      {loading ? (
-        <Box
-          sx={{
-            height: "40vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CircularProgress />
+      <Box
+        component="table"
+        sx={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: 800,
+          backgroundColor: "#fff",
+          borderRadius: 2,
+          boxShadow: 2,
+          overflow: "hidden",
+        }}
+      >
+
+        {/* HEADER */}
+        <Box component="thead" sx={{ backgroundColor: "#f1f5f9" }}>
+          <Box component="tr">
+            {["Name", "SKU", "Unit", "Purchase", "Selling", "Profit"].map((h) => (
+              <Box
+                component="th"
+                key={h}
+                sx={{
+                  textAlign: "left",
+                  padding: "12px",
+                  fontWeight: 700,
+                  color: "#334155",
+                  borderBottom: "1px solid #e2e8f0",
+                }}
+              >
+                {h}
+              </Box>
+            ))}
+          </Box>
         </Box>
-      ) : (
-        <Grid container spacing={3}>
 
-          {filtered.map((product) => {
+        {/* BODY */}
+        <Box component="tbody">
+          {filtered.map((p) => {
             const profit =
-              Number(product.selling_price || 0) -
-              Number(product.purchase_price || 0);
+              Number(p.selling_price || 0) -
+              Number(p.purchase_price || 0);
 
             return (
-              <Grid item xs={12} sm={6} md={4} key={product.id}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: 2,
-                    transition: "0.3s",
-                    "&:hover": {
-                      transform: "translateY(-5px)",
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  <CardContent>
+              <Box
+                component="tr"
+                key={p.id}
+                sx={{
+                  "&:hover": { backgroundColor: "#f8fafc" },
+                  borderBottom: "1px solid #e2e8f0",
+                }}
+              >
+                <Box component="td" sx={{ padding: "12px", fontWeight: 600 }}>
+                  {p.name}
+                </Box>
 
-                    {/* HEADER */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography variant="h6" fontWeight={800}>
-                        {product.name}
-                      </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  {p.sku}
+                </Box>
 
-                      <Inventory2Icon color="primary" />
-                    </Box>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  {p.unit}
+                </Box>
 
-                    <Typography color="text.secondary">
-                      SKU: {product.sku}
-                    </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  ₹{p.purchase_price}
+                </Box>
 
-                    <Typography sx={{ mt: 1 }}>
-                      Unit: {product.unit}
-                    </Typography>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  ₹{p.selling_price}
+                </Box>
 
-                    <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      <Chip
-                        icon={<LocalOfferIcon />}
-                        label={`Buy ₹${product.purchase_price}`}
-                        size="small"
-                      />
-
-                      <Chip
-                        icon={<AttachMoneyIcon />}
-                        label={`Sell ₹${product.selling_price}`}
-                        size="small"
-                        color="primary"
-                      />
-                    </Box>
-
-                    <Typography
-                      sx={{
-                        mt: 2,
-                        fontWeight: 800,
-                        color: profit >= 0 ? "success.main" : "error.main",
-                      }}
-                    >
-                      Profit: ₹{profit}
-                    </Typography>
-
-                  </CardContent>
-                </Card>
-              </Grid>
+                <Box component="td" sx={{ padding: "12px" }}>
+                  <Typography
+                    fontWeight={700}
+                    color={profit >= 0 ? "success.main" : "error.main"}
+                  >
+                    ₹{profit}
+                  </Typography>
+                </Box>
+              </Box>
             );
           })}
-
-        </Grid>
-      )}
-
-      {/* EMPTY STATE */}
-      {!loading && filtered.length === 0 && (
-        <Box sx={{ textAlign: "center", mt: 6 }}>
-          <Typography color="text.secondary">
-            No products found
-          </Typography>
         </Box>
-      )}
+      </Box>
+    </Box>
+
+    {/* EMPTY STATE */}
+    {filtered.length === 0 && (
+      <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Typography color="text.secondary">
+          No products found
+        </Typography>
+      </Box>
+    )}
+  </>
+)}
 
       {/* DIALOG */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>

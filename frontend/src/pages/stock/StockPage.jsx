@@ -179,57 +179,65 @@ export default function StockPage() {
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Chip
-                label="System Active"
-                color="success"
-              />
+              <Chip label="System Active" color="success" />
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* STOCK GRID */}
-      <Grid container spacing={3}>
-        {stock.map((item) => (
-          <Grid item xs={12} md={4} key={item.id}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                boxShadow: 2,
-                transition: "0.3s",
-                "&:hover": {
-                  transform: "translateY(-5px)",
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent>
+      {/* STOCK TABLE (CLEAN VERSION) */}
+        {/* STOCK TABLE (CLEAN TABLE VIEW) */}
+<Box sx={{ mt: 2, overflowX: "auto" }}>
 
-                <Typography variant="h6" fontWeight={800}>
-                  {item.product_name}
-                </Typography>
+  {/* HEADER */}
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "80px 1fr 1fr 120px",
+      fontWeight: 800,
+      p: 2,
+      bgcolor: "#f1f5f9",
+      borderRadius: 2,
+      minWidth: 700,
+    }}
+  >
+    <Box>ID</Box>
+    <Box>Product Name</Box>
+    <Box>Warehouse</Box>
+    <Box>Quantity</Box>
+  </Box>
 
-                <Typography color="text.secondary">
-                  Product ID: {item.product_id}
-                </Typography>
+  {stock.map((s) => (
+  <Box
+    key={s.id}
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "80px 1fr 1fr 120px",
+      p: 2,
+      borderBottom: "1px solid #e2e8f0",
+      alignItems: "center",
+      minWidth: 700,
+      "&:hover": { bgcolor: "#f8fafc" },
+    }}
+  >
+    <Box sx={{ fontWeight: 700 }}>
+      #{s.id}
+    </Box>
 
-                <Typography color="text.secondary">
-                  Warehouse: {item.warehouse_id}
-                </Typography>
+    <Box sx={{ fontWeight: 600 }}>
+      {s.product_name}
+    </Box>
 
-                <Box sx={{ mt: 2 }}>
-                  <Chip
-                    label={`Qty: ${item.quantity}`}
-                    color="primary"
-                  />
-                </Box>
+    <Box>
+      {s.warehouse_id}
+    </Box>
 
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
+    <Box>
+      <Chip label={s.quantity} color="primary" size="small" />
+    </Box>
+  </Box>
+))}
+</Box>
       {/* EMPTY */}
       {!stock.length && (
         <Box sx={{ textAlign: "center", mt: 6 }}>

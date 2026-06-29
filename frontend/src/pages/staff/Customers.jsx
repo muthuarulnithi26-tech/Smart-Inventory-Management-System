@@ -87,7 +87,7 @@ export default function Customers() {
       </Box>
 
       {/* CUSTOMER LIST */}
-      <Grid container spacing={3}>
+      {/* <Grid container spacing={3}>
         {customers.map((c) => (
           <Grid item xs={12} md={4} key={c.id}>
             <Card sx={{ borderRadius: 3 }}>
@@ -116,7 +116,62 @@ export default function Customers() {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </Grid> */}
+      {/* CUSTOMER TABLE STYLE */}
+<Box sx={{ mt: 2, overflowX: "auto" }}>
+
+  {/* HEADER */}
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr 2fr",
+      fontWeight: 800,
+      p: 2,
+      bgcolor: "#f1f5f9",
+      borderRadius: 2,
+      minWidth: 800,
+    }}
+  >
+    <Box>Name</Box>
+    <Box>Email</Box>
+    <Box>Phone</Box>
+    <Box>Address</Box>
+  </Box>
+
+  {/* ROWS */}
+  {customers.map((c) => (
+    <Box
+      key={c.id}
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr 2fr",
+        p: 2,
+        borderBottom: "1px solid #e2e8f0",
+        alignItems: "center",
+        minWidth: 800,
+        "&:hover": {
+          bgcolor: "#f8fafc",
+        },
+      }}
+    >
+      <Box sx={{ fontWeight: 700 }}>
+        {c.name}
+      </Box>
+
+      <Box>
+        {c.email}
+      </Box>
+
+      <Box>
+        {c.phone}
+      </Box>
+
+      <Box sx={{ color: "text.secondary" }}>
+        {c.address}
+      </Box>
+    </Box>
+  ))}
+</Box>
 
       {/* CREATE CUSTOMER DIALOG */}
       <Dialog open={open} onClose={() => setOpen(false)}>

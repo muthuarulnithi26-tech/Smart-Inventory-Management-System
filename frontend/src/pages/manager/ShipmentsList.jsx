@@ -151,7 +151,7 @@ export default function ShipmentsList() {
       </Grid>
 
       {/* SHIPMENT LIST */}
-      <Grid container spacing={3}>
+      {/* <Grid container spacing={3}>
         {shipments.map((s) => (
           <Grid item xs={12} md={6} key={s.id}>
             <Card
@@ -259,7 +259,104 @@ export default function ShipmentsList() {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </Grid> */}
+      {/* SHIPMENT TABLE STYLE */}
+<Box sx={{ mt: 2, overflowX: "auto" }}>
+
+  {/* HEADER ROW */}
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+      fontWeight: 800,
+      p: 2,
+      bgcolor: "#f1f5f9",
+      borderRadius: 2,
+      minWidth: 800,
+    }}
+  >
+    <Box>ID</Box>
+    <Box>Order</Box>
+    <Box>Vehicle</Box>
+    <Box>Driver</Box>
+    <Box>Status</Box>
+  </Box>
+
+  {/* DATA ROWS */}
+  {shipments.map((s) => (
+    <Box
+      key={s.id}
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+        p: 2,
+        borderBottom: "1px solid #e2e8f0",
+        alignItems: "center",
+        minWidth: 800,
+        "&:hover": {
+          bgcolor: "#f8fafc",
+        },
+      }}
+    >
+      {/* ID */}
+      <Box sx={{ fontWeight: 700 }}>
+        #{s.id}
+      </Box>
+
+      {/* ORDER */}
+      <Box>{s.order_id}</Box>
+
+      {/* VEHICLE */}
+      <Box>
+        {s.vehicle_type} - {s.vehicle_number}
+      </Box>
+
+      {/* DRIVER */}
+      <Box>{s.driver_name}</Box>
+
+      {/* STATUS + ACTION */}
+      <Box>
+        <Chip
+          size="small"
+          label={s.status}
+          color={
+            s.status === "PENDING"
+              ? "warning"
+              : s.status === "IN_TRANSIT"
+              ? "info"
+              : "success"
+          }
+        />
+
+        {/* ACTION BUTTONS */}
+        {s.status === "PENDING" && (
+          <Button
+            size="small"
+            sx={{ ml: 1 }}
+            onClick={() =>
+              handleStatusUpdate(s.id, "IN_TRANSIT")
+            }
+          >
+            Dispatch
+          </Button>
+        )}
+
+        {s.status === "IN_TRANSIT" && (
+          <Button
+            size="small"
+            color="success"
+            sx={{ ml: 1 }}
+            onClick={() =>
+              handleStatusUpdate(s.id, "DELIVERED")
+            }
+          >
+            Done
+          </Button>
+        )}
+      </Box>
+    </Box>
+  ))}
+</Box>
 
       {!shipments.length && (
         <Box

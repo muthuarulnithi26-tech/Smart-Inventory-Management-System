@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Button,
@@ -40,7 +39,6 @@ export default function Managers() {
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [form, setForm] = useState({
@@ -49,8 +47,6 @@ export default function Managers() {
     password: "",
     warehouse_id: "",
   });
-
-  /* ---------------- LOAD DATA ---------------- */
 
   useEffect(() => {
     load();
@@ -76,8 +72,6 @@ export default function Managers() {
     }
   };
 
-  /* ---------------- FILTER ---------------- */
-
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return managers;
@@ -88,8 +82,6 @@ export default function Managers() {
         .includes(q)
     );
   }, [search, managers]);
-
-  /* ---------------- CREATE ---------------- */
 
   const handleCreate = async () => {
     try {
@@ -110,8 +102,6 @@ export default function Managers() {
     }
   };
 
-  /* ---------------- DELETE ---------------- */
-
   const handleDelete = async () => {
     try {
       await deleteManager(deleteTarget.id);
@@ -123,12 +113,10 @@ export default function Managers() {
     }
   };
 
-  /* ---------------- UI ---------------- */
-
   return (
     <Box sx={{ p: 2 }}>
 
-      {/* HEADER (compact) */}
+      {/* HEADER */}
       <Box sx={header}>
         <Box>
           <Typography variant="h5" fontWeight={800}>
@@ -148,7 +136,7 @@ export default function Managers() {
         </Button>
       </Box>
 
-      {/* SEARCH + STATS (compact row) */}
+      {/* SEARCH */}
       <Box sx={topRow}>
         <TextField
           size="small"
@@ -173,62 +161,97 @@ export default function Managers() {
         />
       </Box>
 
-      {/* CONTENT */}
-      {loading ? (
-        <Box sx={center}>
-          <CircularProgress />
-        </Box>
-      ) : filtered.length === 0 ? (
-        <Box sx={center}>
-          <Typography color="text.secondary">
-            No managers found
-          </Typography>
-        </Box>
-      ) : (
-        <Grid container spacing={2}>
-          {filtered.map((m) => (
-            <Grid item xs={12} md={4} key={m.id}>
-              <Card sx={card}>
-                <CardContent sx={{ p: 2 }}>
-
-                  {/* top row */}
-                  <Box sx={row}>
-                    <Avatar sx={{ bgcolor: "#2563eb" }}>
-                      <PersonIcon />
-                    </Avatar>
-
-                    <IconButton
-                      color="error"
-                      onClick={() => setDeleteTarget(m)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-
-                  {/* info */}
-                  <Typography fontWeight={700}>
-                    {m.name || "Unnamed"}
-                  </Typography>
-
-                  <Typography variant="body2" color="text.secondary">
-                    {m.email}
-                  </Typography>
-
-                  <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-                    <Chip size="small" label={m.role || "Manager"} />
-                    <Chip
-                      size="small"
-                      label={m.warehouse_id || "No warehouse"}
-                      color={m.warehouse_id ? "success" : "warning"}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+       {/* CONTENT */}
+{loading ? (
+  <Box sx={center}>
+    <CircularProgress />
+  </Box>
+) : filtered.length === 0 ? (
+  <Box sx={center}>
+    <Typography color="text.secondary">
+      No managers found
+    </Typography>
+  </Box>
+) : (
+  <Box sx={{ overflowX: "auto" }}>
+    <Box
+      component="table"
+      sx={{
+        width: "100%",
+        borderCollapse: "collapse",
+        minWidth: 700,
+        backgroundColor: "#fff",
+        borderRadius: 2,
+        overflow: "hidden",
+        boxShadow: 2,
+      }}
+    >
+      {/* HEADER */}
+      <Box component="thead" sx={{ backgroundColor: "#f1f5f9" }}>
+        <Box component="tr">
+          {["Name", "Email", "Role", "Warehouse", "Action"].map((h) => (
+            <Box
+              component="th"
+              key={h}
+              sx={{
+                textAlign: "left",
+                padding: "12px",
+                fontWeight: 700,
+                color: "#334155",
+                borderBottom: "1px solid #e2e8f0",
+              }}
+            >
+              {h}
+            </Box>
           ))}
-        </Grid>
-      )}
+        </Box>
+      </Box>
 
+      {/* BODY */}
+      <Box component="tbody">
+        {filtered.map((m) => (
+          <Box
+            component="tr"
+            key={m.id}
+            sx={{
+              "&:hover": { backgroundColor: "#f8fafc" },
+              borderBottom: "1px solid #e2e8f0",
+            }}
+          >
+            <Box component="td" sx={{ padding: "12px" }}>
+              {m.name || "Unnamed"}
+            </Box>
+
+            <Box component="td" sx={{ padding: "12px" }}>
+              {m.email}
+            </Box>
+
+            <Box component="td" sx={{ padding: "12px" }}>
+              <Chip size="small" label={m.role || "Manager"} />
+            </Box>
+
+            <Box component="td" sx={{ padding: "12px" }}>
+              <Chip
+                size="small"
+                label={m.warehouse_id || "None"}
+                color={m.warehouse_id ? "success" : "warning"}
+              />
+            </Box>
+
+            <Box component="td" sx={{ padding: "12px" }}>
+              <IconButton
+                color="error"
+                onClick={() => setDeleteTarget(m)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  </Box>
+)}
       {/* CREATE DIALOG */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
         <DialogTitle>Create Manager</DialogTitle>
@@ -236,48 +259,36 @@ export default function Managers() {
         <DialogContent>
           <TextField
             fullWidth
-            size="small"
             margin="dense"
             label="Name"
             value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
 
           <TextField
             fullWidth
-            size="small"
             margin="dense"
             label="Email"
             value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
 
           <TextField
             fullWidth
-            size="small"
             margin="dense"
             type="password"
             label="Password"
             value={form.password}
-            onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
           <TextField
             fullWidth
             select
-            size="small"
             margin="dense"
             label="Warehouse"
             value={form.warehouse_id}
-            onChange={(e) =>
-              setForm({ ...form, warehouse_id: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, warehouse_id: e.target.value })}
           >
             <MenuItem value="">None</MenuItem>
             {warehouses.map((w) => (
@@ -297,19 +308,13 @@ export default function Managers() {
       </Dialog>
 
       {/* DELETE DIALOG */}
-      <Dialog
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-      >
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         <DialogTitle>Delete Manager?</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete{" "}
-          <b>{deleteTarget?.name}</b>?
+          Are you sure you want to delete <b>{deleteTarget?.name}</b>?
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
           <Button color="error" onClick={handleDelete}>
             Delete
           </Button>
@@ -320,8 +325,7 @@ export default function Managers() {
   );
 }
 
-/* ---------------- STYLES ---------------- */
-
+/* STYLES */
 const header = {
   display: "flex",
   justifyContent: "space-between",
@@ -340,13 +344,6 @@ const topRow = {
 const card = {
   borderRadius: 2,
   boxShadow: 2,
-};
-
-const row = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  mb: 1,
 };
 
 const center = {

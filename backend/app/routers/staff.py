@@ -7,7 +7,7 @@ from app.core.deps import get_current_user
 
 from app.schemas.customer import CustomerCreate, CustomerResponse
 from app.services.customer_service import create_customer
-
+from app.services import inventory_service
 from app.schemas.staff import (
     StaffDashboardResponse,
     StaffOrderResponse,
@@ -74,16 +74,19 @@ def staff_order(
 
 
 # ---------------- STOCK ----------------
-@router.get("/stock", response_model=list[StaffStockResponse])
-def staff_stock(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
+# @router.get("/stock", response_model=list[StaffStockResponse])
+# def staff_stock(
+#     db: Session = Depends(get_db),
+#     current_user=Depends(get_current_user)
+# ):
 
-    if current_user.role != "staff":
-        raise HTTPException(status_code=403, detail="Not allowed")
+#     if current_user.role != "staff":
+#         raise HTTPException(status_code=403, detail="Not allowed")
 
-    return get_staff_stock(db, current_user)
+#     return get_staff_stock(db, current_user)
+@router.get("/stock")
+def get_stock(db: Session = Depends(get_db)):
+    return inventory_service.get_inventory(db)
 
 @router.post("/customer", response_model=CustomerResponse)
 def staff_create_customer(

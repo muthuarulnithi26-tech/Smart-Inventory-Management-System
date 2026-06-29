@@ -154,74 +154,58 @@ export default function StaffManagement() {
         </Grid>
       </Grid>
 
-      {/* STAFF LIST */}
-      <Grid container spacing={3}>
-        {staff.map((user) => (
-          <Grid item xs={12} sm={6} md={4} key={user.id}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                boxShadow: 2,
-                transition: "0.3s",
-                "&:hover": {
-                  transform: "translateY(-5px)",
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent>
+          {/* STAFF TABLE STYLE LIST */}
+<Box sx={{ mt: 2, overflowX: "auto" }}>
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "1fr 2fr 1fr",
+      fontWeight: 800,
+      p: 2,
+      bgcolor: "#f1f5f9",
+      borderRadius: 2,
+    }}
+  >
+    <Box>Name</Box>
+    <Box>Email</Box>
+    <Box>Role</Box>
+  </Box>
 
-                {/* HEADER */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <PersonIcon color="primary" />
+  {staff.map((user) => (
+    <Box
+      key={user.id}
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 2fr 1fr",
+        p: 2,
+        borderBottom: "1px solid #e2e8f0",
+        alignItems: "center",
+        "&:hover": {
+          bgcolor: "#f8fafc",
+        },
+      }}
+    >
+      {/* NAME */}
+      <Box sx={{ fontWeight: 600 }}>
+        {user.name}
+      </Box>
 
-                  <Chip
-                    label={user.role || "staff"}
-                    size="small"
-                    color="secondary"
-                  />
-                </Box>
+      {/* EMAIL */}
+      <Box sx={{ color: "text.secondary" }}>
+        {user.email}
+      </Box>
 
-                {/* NAME */}
-                <Typography variant="h6" fontWeight={800} mt={1}>
-                  {user.name}
-                </Typography>
-
-                {/* EMAIL */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mt: 1,
-                  }}
-                >
-                  <EmailIcon fontSize="small" />
-                  <Typography color="text.secondary">
-                    {user.email}
-                  </Typography>
-                </Box>
-
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* EMPTY STATE */}
-      {!staff.length && (
-        <Box sx={{ textAlign: "center", mt: 6 }}>
-          <Typography color="text.secondary">
-            No staff members found
-          </Typography>
-        </Box>
-      )}
+      {/* ROLE */}
+      <Box>
+        <Chip
+          label={user.role || "staff"}
+          size="small"
+          color="primary"
+        />
+      </Box>
+    </Box>
+  ))}
+</Box>
 
       {/* DIALOG */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth>

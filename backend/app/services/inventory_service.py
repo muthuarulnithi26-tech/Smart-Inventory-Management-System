@@ -5,7 +5,8 @@ from app.models.inventory import Inventory
 from app.models.stock_movement import StockMovement
 from app.models.product import Product
 from app.services.inventory_validation import validate_inventory_action
-
+from app.models.product import Product
+from app.models.inventory import Inventory
 
 # ---------------- ADD STOCK ----------------
 
@@ -95,26 +96,31 @@ def remove_stock(db: Session, warehouse_id: int, product_id: int, quantity: int,
 
 
 # ---------------- GET INVENTORY ----------------
+def get_inventory(db: Session, warehouse_id: int = None):
 
-def get_inventory(db: Session, warehouse_id: int):
+    query = (
+        db.query(
+            Inventory.id,
+            Inventory.product_id,
+            Inventory.warehouse_id,
+            Inventory.quantity,
+            Product.name.label("product_name")
+        )
+        .join(Product, Product.id == Inventory.product_id)
+    )
 
-    items = db.query(Inventory).filter(
-        Inventory.warehouse_id == warehouse_id
-    ).all()
+    if warehouse_id:
+        query = query.filter(Inventory.warehouse_id == warehouse_id)
 
-    result = []
+    results = query.all()
 
-    for item in items:
-        product = db.query(Product).filter(
-            Product.id == item.product_id
-        ).first()
-
-        result.append({
-            "id": item.id,
-            "warehouse_id": item.warehouse_id,
-            "product_id": item.product_id,
-            "product_name": product.name if product else None,
-            "quantity": item.quantity
-        })
-
-    return result
+    return [
+        {
+            "id": r.id,
+            "product_id": r.product_id,
+            "product_name": r.product_name,
+            "warehouse_id": r.warehouse_id,
+            "quantity": r.quantity
+        }
+        for r in results
+    ]

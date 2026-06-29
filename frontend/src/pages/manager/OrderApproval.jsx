@@ -141,74 +141,91 @@ export default function OrderApproval() {
       </Grid>
 
       {/* ORDERS */}
-      <Grid container spacing={3}>
-        {orders.map((order) => (
-          <Grid item xs={12} md={6} key={order.id}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                boxShadow: 2,
-                transition: "0.3s",
-                "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
-              }}
-            >
-              <CardContent>
-                {/* HEADER */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography variant="h6" fontWeight={800}>
-                    Order #{order.id}
-                  </Typography>
+        {/* ORDERS TABLE STYLE */}
+<Box sx={{ mt: 2, overflowX: "auto" }}>
 
-                  <ShoppingCartIcon color="primary" />
-                </Box>
+  {/* HEADER ROW */}
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr 1fr 2fr",
+      fontWeight: 800,
+      p: 2,
+      bgcolor: "#f1f5f9",
+      borderRadius: 2,
+      minWidth: 800,
+    }}
+  >
+    <Box>Order</Box>
+    <Box>Customer</Box>
+    <Box>Amount</Box>
+    <Box>Status</Box>
+    <Box>Actions</Box>
+  </Box>
 
-                <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  Customer: {order.customer_id}
-                </Typography>
+  {/* DATA ROWS */}
+  {orders.map((order) => (
+    <Box
+      key={order.id}
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr 1fr 2fr",
+        p: 2,
+        borderBottom: "1px solid #e2e8f0",
+        alignItems: "center",
+        minWidth: 800,
+        "&:hover": {
+          bgcolor: "#f8fafc",
+        },
+      }}
+    >
+      {/* ORDER ID */}
+      <Box sx={{ fontWeight: 700 }}>
+        #{order.id}
+      </Box>
 
-                <Typography sx={{ mt: 1, fontWeight: 700 }}>
-                  ₹{order.total_amount}
-                </Typography>
+      {/* CUSTOMER */}
+      <Box>
+        {order.customer_id}
+      </Box>
 
-                <Chip
-                  label={order.status}
-                  color="warning"
-                  sx={{ mt: 2, fontWeight: 700 }}
-                />
+      {/* AMOUNT */}
+      <Box sx={{ fontWeight: 700 }}>
+        ₹{order.total_amount}
+      </Box>
 
-                {/* ACTIONS */}
-                <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="success"
-                    startIcon={<CheckCircleIcon />}
-                    onClick={() => handleApprove(order.id)}
-                  >
-                    Approve
-                  </Button>
+      {/* STATUS */}
+      <Box>
+        <Chip
+          label={order.status}
+          color="warning"
+          size="small"
+        />
+      </Box>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    startIcon={<CancelIcon />}
-                    onClick={() => handleReject(order.id)}
-                  >
-                    Reject
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* ACTIONS */}
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Button
+          size="small"
+          variant="contained"
+          color="success"
+          onClick={() => handleApprove(order.id)}
+        >
+          Approve
+        </Button>
+
+        <Button
+          size="small"
+          variant="contained"
+          color="error"
+          onClick={() => handleReject(order.id)}
+        >
+          Reject
+        </Button>
+      </Box>
+    </Box>
+  ))}
+</Box>
 
       {/* EMPTY STATE */}
       {!orders.length && (
