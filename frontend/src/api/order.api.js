@@ -5,18 +5,23 @@ export const getOrders = async () => {
   return res.data;
 };
 
+export const getPendingOrders = async () => {
+  const res = await api.get("/orders/pending");
+  return res.data;
+};
+
 export const getOrderById = async (id) => {
   const res = await api.get(`/orders/${id}`);
   return res.data;
 };
 
-export const getOrderItems = async (orderId) => {
-  const res = await api.get(`/orders/${orderId}/items`);
+export const getOrderItems = async (id) => {
+  const res = await api.get(`/orders/${id}/items`);
   return res.data;
 };
 
 export const createOrder = async (data) => {
-  const res = await api.post("/orders", data);
+  const res = await api.post("/orders/", data);
   return res.data;
 };
 

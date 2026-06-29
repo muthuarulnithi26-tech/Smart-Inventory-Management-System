@@ -2,35 +2,37 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.models.customer import Customer
+from app.schemas.customer import CustomerCreate, CustomerResponse
 from app.core.deps import get_current_user
-
-from app.schemas.customer import (
-    CustomerCreate,
-    CustomerResponse
-)
-
-from app.services.customer_service import (
-    create_customer,
-    get_customers
-)
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
 
-# CREATE CUSTOMER (STAFF ONLY)
+# ---------------- CREATE CUSTOMER ----------------
 @router.post("/", response_model=CustomerResponse)
-def add_customer(
+def create_customer(
     data: CustomerCreate,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    return create_customer(db, current_user, data)
+    customer = Customer(
+        name=data.name,
+        email=data.email,
+        phone=data.phone
+    )
+
+    db.add(customer)
+    db.commit()
+    db.refresh(customer)
+
+    return customer
 
 
-# GET ALL CUSTOMERS (ADMIN/MANAGER/STAFF VIEW)
+# ---------------- GET ALL CUSTOMERS ----------------
 @router.get("/", response_model=list[CustomerResponse])
-def list_customers(
+def get_customers(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    return get_customers(db)
+    return db.query(Customer).all()

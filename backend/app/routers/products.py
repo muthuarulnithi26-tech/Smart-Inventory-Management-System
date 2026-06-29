@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
+from app.core.deps import get_current_user
 from app.core.database import get_db
 
 from app.schemas.product import (
@@ -16,22 +16,21 @@ router = APIRouter(prefix="/products", tags=["Products"])
 
 
 # ---------------- CREATE PRODUCT ----------------
-
-@router.post("/", response_model=ProductResponse)
+@router.post("/products")
 def create_product(
     data: ProductCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    return product_service.create_product(db, data)
-
+    return product_service.create_product(db, data, current_user)
 
 # ---------------- GET ALL PRODUCTS ----------------
-
-@router.get("/", response_model=list[ProductResponse])
-def get_products(db: Session = Depends(get_db)):
-    return product_service.get_products(db)
-
-
+@router.get("/products")
+def get_products(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    return product_service.get_products(db, current_user)
 # ---------------- UPDATE PRODUCT ----------------
 
 @router.put("/{product_id}", response_model=ProductResponse)

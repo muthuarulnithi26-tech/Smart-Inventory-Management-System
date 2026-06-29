@@ -4,8 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
+
 import App from "./App";
 import "./index.css";
+import { SessionProvider } from "./context/SessionContext";
 
 const theme = createTheme({
   palette: {
@@ -22,13 +24,25 @@ const theme = createTheme({
   },
 });
 
+// createRoot(document.getElementById("root")).render(
+//   <StrictMode>
+//     <ThemeProvider theme={theme}>
+//       <CssBaseline />
+//       <BrowserRouter>
+//         <App />
+//       </BrowserRouter>
+//     </ThemeProvider>
+//   </StrictMode>
+// );
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <SessionProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
+    </SessionProvider>
   </StrictMode>
 );

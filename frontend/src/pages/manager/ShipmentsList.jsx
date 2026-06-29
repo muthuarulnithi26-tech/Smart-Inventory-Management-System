@@ -13,9 +13,11 @@ import {
 
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
 
-import { getShipments, dispatchShipment } from "../../api/shipment.api";
+import {
+  getShipments,
+  updateShipmentStatus,
+} from "../../api/shipment.api";
 
 export default function ShipmentsList() {
   const [shipments, setShipments] = useState([]);
@@ -28,7 +30,9 @@ export default function ShipmentsList() {
   const loadShipments = async () => {
     try {
       setLoading(true);
+
       const data = await getShipments();
+
       setShipments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
@@ -38,14 +42,29 @@ export default function ShipmentsList() {
     }
   };
 
-  const handleDispatch = async (id) => {
-    await dispatchShipment(id);
-    loadShipments();
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      await updateShipmentStatus(id, status);
+      loadShipments();
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update shipment.");
+    }
   };
 
   const total = shipments.length;
-  const dispatched = shipments.filter((s) => s.status === "dispatched").length;
-  const pending = total - dispatched;
+
+  const pending = shipments.filter(
+    (s) => s.status === "PENDING"
+  ).length;
+
+  const inTransit = shipments.filter(
+    (s) => s.status === "IN_TRANSIT"
+  ).length;
+
+  const delivered = shipments.filter(
+    (s) => s.status === "DELIVERED"
+  ).length;
 
   if (loading) {
     return (
@@ -64,18 +83,21 @@ export default function ShipmentsList() {
 
   return (
     <Box sx={{ width: "100%" }}>
-
       {/* HEADER */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={800}>
           Shipments
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
           Manage dispatch and delivery tracking
         </Typography>
       </Box>
 
-      {/* KPI */}
+      {/* KPI CARDS */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3 }}>
@@ -83,6 +105,7 @@ export default function ShipmentsList() {
               <Typography color="text.secondary">
                 Total Shipments
               </Typography>
+
               <Typography variant="h5" fontWeight={800}>
                 {total}
               </Typography>
@@ -94,10 +117,15 @@ export default function ShipmentsList() {
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Typography color="text.secondary">
-                Dispatched
+                In Transit
               </Typography>
-              <Typography variant="h5" fontWeight={800} color="success.main">
-                {dispatched}
+
+              <Typography
+                variant="h5"
+                fontWeight={800}
+                color="info.main"
+              >
+                {inTransit}
               </Typography>
             </CardContent>
           </Card>
@@ -107,17 +135,22 @@ export default function ShipmentsList() {
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Typography color="text.secondary">
-                Pending
+                Delivered
               </Typography>
-              <Typography variant="h5" fontWeight={800} color="warning.main">
-                {pending}
+
+              <Typography
+                variant="h5"
+                fontWeight={800}
+                color="success.main"
+              >
+                {delivered}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* LIST */}
+      {/* SHIPMENT LIST */}
       <Grid container spacing={3}>
         {shipments.map((s) => (
           <Grid item xs={12} md={6} key={s.id}>
@@ -133,8 +166,6 @@ export default function ShipmentsList() {
               }}
             >
               <CardContent>
-
-                {/* HEADER ROW */}
                 <Box
                   sx={{
                     display: "flex",
@@ -142,8 +173,15 @@ export default function ShipmentsList() {
                     alignItems: "center",
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
                     <LocalShippingIcon color="primary" />
+
                     <Typography fontWeight={800}>
                       Shipment #{s.id}
                     </Typography>
@@ -151,12 +189,16 @@ export default function ShipmentsList() {
 
                   <Chip
                     label={s.status}
-                    color={s.status === "dispatched" ? "success" : "warning"}
-                    size="small"
+                    color={
+                      s.status === "PENDING"
+                        ? "warning"
+                        : s.status === "IN_TRANSIT"
+                        ? "info"
+                        : "success"
+                    }
                   />
                 </Box>
 
-                {/* DETAILS */}
                 <Box sx={{ mt: 2 }}>
                   <Typography color="text.secondary">
                     Order ID: {s.order_id}
@@ -165,34 +207,72 @@ export default function ShipmentsList() {
                   <Typography color="text.secondary">
                     Vehicle: {s.vehicle_type} - {s.vehicle_number}
                   </Typography>
+
+                  <Typography color="text.secondary">
+                    Driver: {s.driver_name}
+                  </Typography>
                 </Box>
 
-                {/* ACTION */}
-                <Button
-                  variant="contained"
-                  onClick={() => handleDispatch(s.id)}
-                  disabled={s.status === "dispatched"}
-                  startIcon={<CheckCircleIcon />}
-                  sx={{ mt: 2 }}
-                >
-                  Dispatch
-                </Button>
+                {s.status === "PENDING" && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<LocalShippingIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        s.id,
+                        "IN_TRANSIT"
+                      )
+                    }
+                    sx={{ mt: 2 }}
+                  >
+                    Dispatch
+                  </Button>
+                )}
 
+                {s.status === "IN_TRANSIT" && (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<CheckCircleIcon />}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        s.id,
+                        "DELIVERED"
+                      )
+                    }
+                    sx={{ mt: 2 }}
+                  >
+                    Mark Delivered
+                  </Button>
+                )}
+
+                {s.status === "DELIVERED" && (
+                  <Chip
+                    sx={{ mt: 2 }}
+                    color="success"
+                    icon={<CheckCircleIcon />}
+                    label="Completed"
+                  />
+                )}
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* EMPTY */}
       {!shipments.length && (
-        <Box sx={{ textAlign: "center", mt: 6 }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            mt: 6,
+          }}
+        >
           <Typography color="text.secondary">
             No shipments found
           </Typography>
         </Box>
       )}
-
     </Box>
   );
-}
+}''

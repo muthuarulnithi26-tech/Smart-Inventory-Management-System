@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime,ForeignKey
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -16,7 +16,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
 
     role = Column(String(50), nullable=False)
-
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()

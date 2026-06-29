@@ -1,19 +1,17 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
-
 from app.models.product import Product
 from app.models.warehouse import Warehouse
 from app.core.warehouse_access import check_warehouse_access
 
 
 def validate_inventory_action(
-    db: Session,
+    db,
     user,
-    warehouse_id: int,
-    product_id: int
-) -> bool:
-    # ---------------- CHECK WAREHOUSE ----------------
-
+    warehouse_id,
+    product_id,
+    required_roles
+):
+    # Check warehouse
     warehouse = db.query(Warehouse).filter(
         Warehouse.id == warehouse_id
     ).first()
@@ -24,8 +22,7 @@ def validate_inventory_action(
             detail="Warehouse not found"
         )
 
-    # ---------------- CHECK PRODUCT ----------------
-
+    # Check product
     product = db.query(Product).filter(
         Product.id == product_id
     ).first()
@@ -36,13 +33,12 @@ def validate_inventory_action(
             detail="Product not found"
         )
 
-    # ---------------- CHECK ACCESS ----------------
-
+    # Check warehouse access
     check_warehouse_access(
         db,
         user.id,
         warehouse_id,
-        required_roles=["admin", "manager"]
+        required_roles=required_roles
     )
 
     return True

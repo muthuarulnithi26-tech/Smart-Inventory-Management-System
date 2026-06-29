@@ -95,14 +95,14 @@ export default function StaffManagement() {
           gap: 2,
         }}
       >
-        <Box>
+        {/* <Box>
           <Typography variant="h5" fontWeight={800}>
             Staff Management
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Manage your warehouse staff members
           </Typography>
-        </Box>
+        </Box> */}
 
         <Button
           variant="contained"

@@ -10,52 +10,35 @@ from app.models.order import Order
 
 
 # ---------------- CREATE MANAGER ----------------
+def create_manager(db: Session, data):
 
-def create_manager(
-    db: Session,
-    name: str,
-    email: str,
-    password: str,
-    warehouse_id: int
-):
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(400, "Email already exists")
 
-    # 1. Check email already exists
-    existing = db.query(User).filter(
-        User.email == email
+    warehouse = db.query(Warehouse).filter(
+        Warehouse.id == data.warehouse_id
     ).first()
 
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already exists"
-        )
+    if not warehouse:
+        raise HTTPException(404, "Warehouse not found")
 
-    # 2. Create manager user
     manager = User(
-        name=name,
-        email=email,
-        password_hash=hash_password(password),
-        role="manager"
+        name=data.name,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        role="manager",
+        warehouse_id=warehouse.id   # ✅ IMPORTANT FIX
     )
 
     db.add(manager)
     db.commit()
     db.refresh(manager)
 
-    # 3. Assign warehouse (ONE MANAGER = ONE WAREHOUSE)
-    assignment = WarehouseAssignment(
-        user_id=manager.id,
-        warehouse_id=warehouse_id,
-        role="manager"
-    )
-
-    db.add(assignment)
-    db.commit()
-
     return {
-        "message": "Manager created successfully",
+        "message": "Manager created",
         "manager_id": manager.id,
-        "warehouse_id": warehouse_id
+        "warehouse_id": warehouse.id
     }
 def get_managers(db: Session):
 

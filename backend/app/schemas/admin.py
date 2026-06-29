@@ -5,4 +5,3 @@ class CreateManagerRequest(BaseModel):
     email: EmailStr
     password: str
     warehouse_id: int
-    

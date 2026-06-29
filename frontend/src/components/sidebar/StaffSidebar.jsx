@@ -7,7 +7,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -47,6 +47,11 @@ export default function StaffSidebar() {
       label: "Orders",
       path: "/staff/orders",
       icon: <ReceiptLongIcon />,
+    },
+    {
+    label: "Create Shipment",
+    path: "/staff/shipments/create",
+    icon: <AddBoxIcon />,
     },
     {
       label: "Stock",

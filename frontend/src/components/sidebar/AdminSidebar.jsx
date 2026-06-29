@@ -37,11 +37,11 @@ export default function AdminSidebar() {
       path: "/admin/managers",
       icon: <PeopleIcon />,
     },
-    {
-      label: "Order Approval",
-      path: "/admin/orders-approval",
-      icon: <ReceiptLongIcon />,
-    },
+    // {
+    //   label: "Order Approval",
+    //   path: "/admin/orders-approval",
+    //   icon: <ReceiptLongIcon />,
+    // },
     {
       label: "Reports",
       path: "/admin/reports",

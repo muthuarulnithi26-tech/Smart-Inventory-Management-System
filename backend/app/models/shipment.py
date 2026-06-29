@@ -23,14 +23,15 @@ class Shipment(Base):
 
     created_by = Column(
         Integer,
-        ForeignKey("users.id")
+        ForeignKey("users.id"),
+        nullable=False
     )
 
-    vehicle_type = Column(String)
+    vehicle_type = Column(String, nullable=False)
 
-    vehicle_number = Column(String)
+    vehicle_number = Column(String, nullable=True)
 
-    driver_name = Column(String)
+    driver_name = Column(String, nullable=True)
 
     status = Column(
         String,

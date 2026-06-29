@@ -132,7 +132,7 @@ export default function ManagerDashboard() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        {/* <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Chip
             label="Manager Panel"
             sx={{
@@ -154,7 +154,7 @@ export default function ManagerDashboard() {
           >
             Logout
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* KPI CARDS (FIXED GRID) */}

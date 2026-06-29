@@ -17,13 +17,14 @@ from app.routers import reports
 # from app.routers import dealer
 # from app.routers import customers
 from app.routers import shipments
-# from app.routers import customers
+from app.routers import customer
 from app.routers import orders
 from app.routers import transport_cost
 from app.routers import reports
 from app.routers import admin, manager
 from app.routers import dashboard
 from app.routers import staff
+
 
 # Modules
 from app.models.shipment import Shipment
@@ -96,7 +97,7 @@ app.include_router(containers.router)
 # app.include_router(dealer.router)
 # app.include_router(transport.router)
 app.include_router(shipments.router)
-# app.include_router(customers.router)
+app.include_router(customer.router)
 app.include_router(orders.router)
 app.include_router(transport_cost.router)
 app.include_router(reports.router)
