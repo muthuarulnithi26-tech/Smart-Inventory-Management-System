@@ -19,7 +19,8 @@ def create_customer(
     customer = Customer(
         name=data.name,
         email=data.email,
-        phone=data.phone
+        phone=data.phone,
+        address=data.address
     )
 
     db.add(customer)
