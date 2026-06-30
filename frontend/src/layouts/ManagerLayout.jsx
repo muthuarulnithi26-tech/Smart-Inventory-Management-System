@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import ManagerSidebar from "../components/sidebar/ManagerSidebar";
-import Navbar from "../components/navbar/navbar";
+import Navbar from "../components/navbar/Navbar";
 
 export default function ManagerLayout() {
   return (
