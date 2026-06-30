@@ -46,9 +46,9 @@ export default function OrdersList() {
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5">Orders</Typography>
 
-        <Button variant="contained" onClick={() => navigate("/orders/create")}>
+        {/* <Button variant="contained" onClick={() => navigate("/orders/create")}>
           Create Order
-        </Button>
+        </Button> */}
       </Box>
 
       <Grid container spacing={3}>

@@ -13,7 +13,7 @@ from app.models.user import User
 # ---------------- CONFIG ----------------
 SECRET_KEY = "inventory_secret_key_change_this"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 2
+ACCESS_TOKEN_EXPIRE_MINUTES = 10
 
 
 # ---------------- PASSWORD ----------------

@@ -77,54 +77,54 @@ def get_warehouse_summary(db: Session, warehouse_id: int):
 
 
 # ---------------- ADMIN REPORT ----------------
-# def get_admin_report(db: Session, user):
-#     if user.role != "admin":
-#         return {"error": "Not allowed"}
+def get_admin_report(db: Session, user):
+    if user.role != "admin":
+        return {"error": "Not allowed"}
 
-#     total_orders = db.query(Order).count()
-#     total_stock = db.query(Inventory).count()
-#     total_revenue = db.query(
-#         func.coalesce(func.sum(Order.total_amount), 0)
-#     ).scalar()
-
-#     return {
-#         "total_orders": total_orders,
-#         "total_stock": total_stock,
-#         "total_revenue": total_revenue
-#     }
-
-def get_stock_report(db: Session, user):
-
-    stocks = (
-        db.query(
-            Inventory.id,
-            Inventory.product_id,
-            Product.name.label("product_name"),
-            Inventory.warehouse_id,
-            Inventory.quantity
-        )
-        .join(Product, Product.id == Inventory.product_id)
-        .all()
-    )
-
-    total_stock = sum(s.quantity or 0 for s in stocks)
-
-    stock_list = [
-        {
-            "id": s.id,
-            "product_id": s.product_id,
-            "product_name": s.product_name,
-            "warehouse_id": s.warehouse_id,
-            "quantity": s.quantity
-        }
-        for s in stocks
-    ]
+    total_orders = db.query(Order).count()
+    total_stock = db.query(Inventory).count()
+    total_revenue = db.query(
+        func.coalesce(func.sum(Order.total_amount), 0)
+    ).scalar()
 
     return {
-        "total_products": len(stocks),
-        "total_stock_quantity": total_stock,
-        "stocks": stock_list
-    }
+        "total_orders": total_orders,
+        "total_stock": total_stock,
+        "total_revenue": total_revenue
+   }
+
+# def get_stock_report(db: Session, user):
+
+#     stocks = (
+#         db.query(
+#              Inventory.id,
+#             Inventory.product_id,
+#             Product.name.label("product_name"),
+#             Inventory.warehouse_id,
+#             Inventory.quantity
+#         )
+#         .join(Product, Product.id == Inventory.product_id)
+#         .all()
+#     )
+
+#     total_stock = sum(s.quantity or 0 for s in stocks)
+
+#     stock_list = [
+#         {
+#             "id": s.id,
+#             "product_id": s.product_id,
+#             "product_name": s.product_name,
+#             "warehouse_id": s.warehouse_id,
+#             "quantity": s.quantity
+#         }
+#         for s in stocks
+#     ]
+
+#     return {
+#         "total_products": len(stocks),
+#         "total_stock_quantity": total_stock,
+#         "stocks": stock_list
+#     }
 # ---------------- STOCK REPORT ----------------
 def get_stock_report(db: Session, user):
     stocks = db.query(Inventory).all()

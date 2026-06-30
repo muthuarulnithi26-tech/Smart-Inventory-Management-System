@@ -80,13 +80,13 @@ export default function Orders() {
           </Typography>
         </Box>
 
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<AddShoppingCartIcon />}
           onClick={() => navigate("/staff/orders/create")}
         >
           Create Order
-        </Button>
+        </Button> */}
       </Box>
 
       {/* SEARCH + KPI */}
