@@ -1,8 +1,8 @@
 {
-  "command": "python -m uvicorn app.main:app --host 0.0.0.0 --port 8080",
+  "stack": "python_3_11",
   "build_path": ".",
-  "stack": "python_3_13",
-  "env_variables": {},
+  "command": "sh -c 'python3 -m site && python3 -m pip install --user -r requirements.txt && python3 -m pip show uvicorn && python3 -c \"import uvicorn; print(uvicorn.__file__)\" && exec python3 -m uvicorn app.main:app --host 0.0.0.0 --port $X_ZOHO_CATALYST_LISTEN_PORT'",
   "memory": 256,
+  "env_variables": {},
   "scripts": {}
 }

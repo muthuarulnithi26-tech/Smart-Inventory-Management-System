@@ -8,9 +8,7 @@ venv/
 node_modules/
 
 # Environment
-.env.local
-.env.production
-
+.env
 
 # Build
 dist/

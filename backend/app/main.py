@@ -12,28 +12,22 @@ from app.routers import products
 from app.routers import inventory
 from app.routers import containers
 from app.routers.auth import router as auth_router
-# from app.routers import transport
 from app.routers import reports
-# from app.routers import dealer
-# from app.routers import customers
 from app.routers import shipments
 from app.routers import customer
 from app.routers import orders
 from app.routers import transport_cost
-from app.routers import reports
-from app.routers import admin, manager
 from app.routers import dashboard
 from app.routers import staff
-
-
+from app.routers import admin
+from app.routers import manager
 # Modules
 from app.models.shipment import Shipment
 from app.models.customer import Customer
 from app.models.order import Order
 from app.models.order_item import OrderItem
 
-from app.routers import admin
-from app.routers import manager
+
 # Create database tables
 
 def create_default_admin():
@@ -64,9 +58,9 @@ def create_default_admin():
 
     finally:
         db.close()
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
-create_default_admin()
+# create_default_admin()
 
 
 app = FastAPI(

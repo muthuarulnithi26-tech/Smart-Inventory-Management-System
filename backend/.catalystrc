@@ -22,7 +22,15 @@
           "idx": 1,
           "id": "60076025602",
           "name": "Development",
-          "type": 3
+          "type": 3,
+          "env_status": "Active",
+          "project_details": {
+            "project_name": "Smart-Inventory-Management-System",
+            "id": "43494000000013048",
+            "project_type": "Live"
+          },
+          "is_default": true,
+          "action_required": false
         }
       ]
     }
