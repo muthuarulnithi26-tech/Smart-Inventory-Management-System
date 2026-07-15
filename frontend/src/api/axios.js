@@ -2,7 +2,7 @@ import axios from "axios";
 import { sessionEvent } from "../utils/sessionEvent";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "https://backend-test-50043521019.development.catalystappsail.in"
 });
 
 // Attach token
