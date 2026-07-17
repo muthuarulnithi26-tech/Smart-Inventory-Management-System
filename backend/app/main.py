@@ -71,8 +71,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "https://smart-inventory-mana-radhhsli.onslate.in"
+        "https://smart-inventory-mana-radhhsli.onslate.in",
     ],
     allow_credentials=True,
     allow_methods=["*"],
