@@ -47,12 +47,17 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const res = await loginUser(form);
+       const res = await loginUser(form);
+
+       console.log("✅ Login Response:", res);
+       console.log("✅ Access Token:", res.access_token);
+       console.log("✅ Role:", res.role);
 
       localStorage.setItem("token", res.access_token);
       localStorage.setItem("role", res.role);
 
-      if (res.role === "admin") {
+      console.log("✅ Stored Token:", localStorage.getItem("token"));
+            if (res.role === "admin") {
         navigate("/admin");
       } else if (res.role === "manager") {
         navigate("/manager");
@@ -67,101 +72,118 @@ export default function Login() {
   };
 
   return (
-    <>
-      <Typography
-        variant="h4"
-        fontWeight={800}
-        mb={1}
-        textAlign="center"
+    <Box
+     sx={{
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}
+  >
+    <Typography
+      variant="h4"
+      fontWeight={800}
+      textAlign="center"
+      sx={{ mb: 1 }}
+    >
+      Welcome Back
+    </Typography>
+
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      textAlign="center"
+      sx={{ mb: 4 }}
+    >
+      Sign in to continue
+    </Typography>
+
+    {error && (
+      <Alert
+        severity="error"
+        sx={{
+          width: "100%",
+          mb: 3,
+        }}
       >
-        Welcome Back
-      </Typography>
+        {error}
+      </Alert>
+    )}
 
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        mb={3}
-        textAlign="center"
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2.5,
+      }}
+    >
+      <TextField
+        label="Email Address"
+        name="email"
+        value={form.email}
+        onChange={handleChange}
+        fullWidth
+        autoComplete="email"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleLogin();
+        }}
+      />
+
+      <TextField
+        label="Password"
+        name="password"
+        type={showPassword ? "text" : "password"}
+        value={form.password}
+        onChange={handleChange}
+        fullWidth
+        autoComplete="current-password"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleLogin();
+        }}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                edge="end"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <Button
+        variant="contained"
+        fullWidth
+        size="large"
+        disabled={loading}
+        onClick={handleLogin}
+        sx={{
+          mt: 1,
+          height: 50,
+          fontWeight: 700,
+          fontSize: "1rem",
+          borderRadius: 2,
+          textTransform: "none",
+        }}
       >
-        Sign in to continue
-      </Typography>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box sx={{ display: "grid", gap: 2 }}>
-        <TextField
-          label="Email Address"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          fullWidth
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
-        />
-
-        <TextField
-          label="Password"
-          name="password"
-          type={showPassword ? "text" : "password"}
-          value={form.password}
-          onChange={handleChange}
-          fullWidth
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleLogin();
-            }
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
-                >
-                  {showPassword ? (
-                    <VisibilityOff />
-                  ) : (
-                    <Visibility />
-                  )}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <Button
-          variant="contained"
-          size="large"
-          onClick={handleLogin}
-          disabled={loading}
-          sx={{
-            mt: 1,
-            py: 1.5,
-            borderRadius: 2,
-            fontWeight: 700,
-          }}
-        >
-          {loading ? (
-            <>
-              <CircularProgress
-                size={20}
-                sx={{ mr: 1 }}
-              />
-              Signing In...
-            </>
-          ) : (
-            "Sign In"
-          )}
-        </Button>
-      </Box>
-    </>
-  );
+        {loading ? (
+          <>
+            <CircularProgress
+              size={20}
+              color="inherit"
+              sx={{ mr: 1 }}
+            />
+            Signing In...
+          </>
+        ) : (
+          "Sign In"
+        )}
+      </Button>
+    </Box>
+  </Box>
+);
 }
