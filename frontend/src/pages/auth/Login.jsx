@@ -65,10 +65,20 @@ export default function Login() {
         navigate("/staff");
       }
     } catch (err) {
-      setError("Invalid email or password.");
-    } finally {
-      setLoading(false);
+  console.log("========== LOGIN ERROR ==========");
+  console.log("Error Object:", err);
+  console.log("Response:", err.response);
+  console.log("Status:", err.response?.status);
+  console.log("Headers:", err.response?.headers);
+  console.log("Data:", err.response?.data);
+  console.log("Message:", err.message);
+  console.log("=================================");
+
+  setError(err.response?.data?.detail || err.message);
+} finally {
+  setLoading(false);
     }
+    
   };
 
   return (

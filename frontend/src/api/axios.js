@@ -25,14 +25,14 @@ api.interceptors.request.use((config) => {
 });
 api.interceptors.response.use(
   (response) => {
-    console.log("✅ Axios Success:", response);
+    console.log("SUCCESS RESPONSE:", response);
     return response;
   },
-
   (error) => {
-    console.log("❌ Axios Error:", error);
-    console.log("❌ Response:", error.response);
-    console.log("❌ Message:", error.message);
+    console.log("FAILED RESPONSE:", error);
+    console.log("FAILED RESPONSE DATA:", error.response?.data);
+    console.log("FAILED RESPONSE STATUS:", error.response?.status);
+    console.log("FAILED RESPONSE HEADERS:", error.response?.headers);
 
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
@@ -43,5 +43,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default api;

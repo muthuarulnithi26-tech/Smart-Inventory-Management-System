@@ -26,8 +26,6 @@ from app.models.shipment import Shipment
 from app.models.customer import Customer
 from app.models.order import Order
 from app.models.order_item import OrderItem
-
-
 # Create database tables
 
 def create_default_admin():
@@ -68,16 +66,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://smart-inventory-mana-mvgfsiqz.onslate.in",
-    ],
+    allow_origins=["https://<your-slate-app>.catalystserverless.<zone>.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # AUTH
 app.include_router(auth_router)
 
