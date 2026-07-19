@@ -24,8 +24,16 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ Axios Success:", response);
+    return response;
+  },
+
   (error) => {
+    console.log("❌ Axios Error:", error);
+    console.log("❌ Response:", error.response);
+    console.log("❌ Message:", error.message);
+
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
