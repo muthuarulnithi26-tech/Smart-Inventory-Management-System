@@ -8,11 +8,12 @@ console.log("Axios Base URL:", api.defaults.baseURL);
 
 // Debug interceptor
 api.interceptors.request.use((config) => {
-  console.log("Sending Request:", {
-    url: config.baseURL + config.url,
-    data: config.data,
-    headers: config.headers,
-  });
+  console.log("================================");
+  console.log("URL:", config.baseURL + config.url);
+  console.log("METHOD:", config.method);
+  console.log("DATA:", JSON.stringify(config.data));
+  console.log("HEADERS:", config.headers);
+  console.log("================================");
 
   const token = localStorage.getItem("token");
 
@@ -22,7 +23,6 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
 api.interceptors.response.use(
   (response) => {
     console.log("✅ Axios Success:", response);
