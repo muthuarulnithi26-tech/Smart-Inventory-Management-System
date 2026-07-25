@@ -6,15 +6,21 @@ import {
   Typography,
   Button,
 } from "@mui/material";
+import { useSession } from "../context/SessionContext";
 
-export default function SessionExpiredDialog({ open }) {
+export default function SessionExpiredDialog() {
+  const { sessionExpired } = useSession();
+
   const handleLogin = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
     window.location.href = "/login";
   };
 
   return (
     <Dialog
-      open={open}
+      open={!!sessionExpired}
       disableEscapeKeyDown
     >
       <DialogTitle>
@@ -42,10 +48,3 @@ export default function SessionExpiredDialog({ open }) {
     </Dialog>
   );
 }
-// import { useSession } from "../context/SessionContext";
-
-// export default function SessionExpiredDialog() {
-//   const { sessionExpired } = useSession();
-
-//   return (
-//     <Dialog open={sessionExpired}></Dialog>

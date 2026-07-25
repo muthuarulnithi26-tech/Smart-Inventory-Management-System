@@ -58,7 +58,7 @@ export default function Managers() {
 
       const [mRes, wRes] = await Promise.all([
         getManagers(),
-        api.get("/warehouses"),
+        api.get("/warehouses/"),
       ]);
 
       setManagers(Array.isArray(mRes) ? mRes : []);

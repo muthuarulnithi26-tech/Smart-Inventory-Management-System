@@ -23,7 +23,7 @@ export const getMyOrders = async () => {
 =========================== */
 
 export const getOrderDetails = async (orderId) => {
-  const res = await api.get(`/staff/orders/${orderId}`);
+  const res = await api.get(`/staff/order/${orderId}`);
   return res.data;
 };
 
@@ -37,17 +37,17 @@ export const getWarehouseStock = async () => {
 };
 
 export const createCustomer = async (data) => {
-  const res = await api.post("/customers", data);
+  const res = await api.post("/customers/", data);
   return res.data;
 };
 
 export const getCustomers = async () => {
-  const res = await api.get("/customers");
+  const res = await api.get("/customers/");
   return res.data;
 };
 
 export const createOrder = async (data) => {
-  const res = await api.post("/orders", data);
+  const res = await api.post("/orders/", data);
   return res.data;
 };
 

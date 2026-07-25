@@ -2,9 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 import RoleRoute from "../components/RoleRoute";
+import RoleHomeRedirect from "../components/RoleHomeRedirect";
 
 import AuthLayout from "../layouts/AuthLayout";
-import DashboardLayout from "../layouts/DashboardLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import ManagerLayout from "../layouts/ManagerLayout";
 import StaffLayout from "../layouts/StaffLayout";
@@ -15,6 +15,7 @@ import Login from "../pages/auth/Login";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import Warehouses from "../pages/admin/warehouses/Warehouses";
 import Managers from "../pages/admin/managers/Managers";
+import Users from "../pages/users/Users";
 
 /* MANAGER */
 import StaffManagement from "../pages/manager/StaffManagement";
@@ -55,7 +56,7 @@ export default function AppRoutes() {
         path="/"
         element={
           <ProtectedRoute>
-            <DashboardLayout />
+            <RoleHomeRedirect />
           </ProtectedRoute>
         }
       />
@@ -118,6 +119,7 @@ export default function AppRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="warehouses" element={<Warehouses />} />
         <Route path="managers" element={<Managers />} />
+        <Route path="users" element={<Users />} />
         <Route path="reports" element={<ReportsDashboard />} />
       </Route>
 

@@ -1,0 +1,13 @@
+{
+  "slate": [
+    {
+      "name": "smart-inventory-frontend",
+      "source": ".",
+      "build_path": "dist",
+      "install_command": "npm install",
+      "build_command": "npm run build",
+      "deployment_name": "smart-inventory-frontend",
+      "dev_command": "npm run dev -- --port $ZC_SLATE_PORT"
+    }
+  ]
+}

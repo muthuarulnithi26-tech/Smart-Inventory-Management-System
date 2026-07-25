@@ -4,38 +4,35 @@ import { sessionEvent } from "../utils/sessionEvent";
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
-console.log("Axios Base URL:", api.defaults.baseURL);
 
-// Debug interceptor
+// Only log request/response details in local development — this was
+// previously always-on and leaking request payloads/headers to the
+// browser console in production.
+const isDev = import.meta.env.DEV;
+
 api.interceptors.request.use((config) => {
-  console.log("================================");
-  console.log("URL:", config.baseURL + config.url);
-  console.log("METHOD:", config.method);
-  console.log("DATA:", JSON.stringify(config.data));
-  console.log("HEADERS:", config.headers);
-  console.log("================================");
+  if (isDev) {
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data ?? "");
+  }
 
   const token = localStorage.getItem("token");
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
+
 api.interceptors.response.use(
-  (response) => {
-    console.log("SUCCESS RESPONSE:", response);
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.log("FAILED RESPONSE:", error);
-    console.log("FAILED RESPONSE DATA:", error.response?.data);
-    console.log("FAILED RESPONSE STATUS:", error.response?.status);
-    console.log("FAILED RESPONSE HEADERS:", error.response?.headers);
+    if (isDev) {
+      console.log("[API] Error:", error.response?.status, error.response?.data);
+    }
 
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
       localStorage.removeItem("user");
       sessionEvent.notify();
     }
@@ -43,4 +40,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 export default api;

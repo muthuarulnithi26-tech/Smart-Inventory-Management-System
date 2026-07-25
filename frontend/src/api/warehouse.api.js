@@ -1,12 +1,12 @@
 import api from "./axios";
 
 export const getWarehouses = async () => {
-  const res = await api.get("/warehouses");
+  const res = await api.get("/warehouses/");   // add trailing slash
   return res.data;
 };
 
 export const createWarehouse = async (data) => {
-  const res = await api.post("/warehouses", data);
+  const res = await api.post("/warehouses/", data);
   return res.data;
 };
 
