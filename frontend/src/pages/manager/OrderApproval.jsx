@@ -127,9 +127,6 @@ export default function OrderApproval() {
     );
 
   }
-// ================= PART 2 START =================
-
-
   return (
 
     <Box sx={{ width: "100%" }}>
@@ -347,7 +344,6 @@ export default function OrderApproval() {
 
 
       </Grid>
-       // ================= PART 3 START =================
 
 
       {/* ORDERS TABLE */}
@@ -474,186 +470,76 @@ export default function OrderApproval() {
               #{order.id}
 
             </Box>
-
-
-
-
-
-
-
             {/* CUSTOMER ID */}
-
-
             <Box>
 
               {order.customer_id}
 
             </Box>
 
-
-
-
-
-
-
             {/* ORDER AMOUNT */}
-
 
             <Box
               sx={{
                 fontWeight: 700,
               }}
             >
-
               ₹{order.total_amount}
-
             </Box>
-
-
-
-
-
-
-
             {/* STATUS */}
-
-
             <Box>
-
-
               <Chip
-
                 label={order.status}
-
                 color="warning"
-
                 size="small"
-
               />
-
-
             </Box>
-
-
-
-
-
-
-
             {/* ACTION BUTTONS */}
-
-
             <Box
-
               sx={{
-
                 display: "flex",
-
                 gap: 1,
-
               }}
-
             >
-
-
-
               <Button
-
                 size="small"
-
                 variant="contained"
-
                 color="success"
-
                 onClick={() =>
                   handleApprove(order.id)
                 }
-
               >
-
                 Approve
-
               </Button>
-
-
-
-
-
-
               <Button
-
                 size="small"
-
                 variant="contained"
-
                 color="error"
-
                 onClick={() =>
                   handleReject(order.id)
                 }
-
               >
-
                 Reject
-
               </Button>
-
-
-
-
             </Box>
-
-
-
-
-
           </Box>
-
-
         ))}
-
-
-
       </Box>
-      // ================= PART 4 START =================
-
-
-
       {/* EMPTY STATE */}
-
       {!orders.length && (
-
         <Box
-
           sx={{
-
             textAlign: "center",
-
             mt: 6,
-
           }}
-
         >
-
           <Typography
-
             color="text.secondary"
-
           >
-
             No pending orders
-
           </Typography>
-
-
         </Box>
-
       )}
-
-
-
-
-
     </Box>
 
   );
