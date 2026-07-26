@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   Box,
   Typography,
@@ -6,8 +7,10 @@ import {
   TextField,
   Card,
   CardContent,
-  InputAdornment,
+  Grid,
   Chip,
+  CircularProgress,
+  InputAdornment,
   Table,
   TableBody,
   TableCell,
@@ -20,8 +23,11 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { useNavigate } from "react-router-dom";
+
 import api from "../../api/axios";
 
 export default function Orders() {
@@ -29,6 +35,7 @@ export default function Orders() {
 
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     load();
@@ -36,28 +43,61 @@ export default function Orders() {
 
   const load = async () => {
     try {
+      setLoading(true);
+
       const res = await api.get("/staff/orders");
+
       setOrders(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.log(err);
       setOrders([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const filteredOrders = useMemo(() => {
-    const q = search.toLowerCase().trim();
+    const keyword = search.toLowerCase().trim();
 
-    if (!q) return orders;
+    if (!keyword) return orders;
 
-    return orders.filter((o) =>
-      `${o.id} ${o.customer_id} ${o.status}`
+    return orders.filter((order) =>
+      `${order.id}
+       ${order.customer_id}
+       ${order.warehouse_id}
+       ${order.status}`
         .toLowerCase()
-        .includes(q)
+        .includes(keyword)
     );
   }, [orders, search]);
 
+  const totalOrders = orders.length;
+
+  const pendingOrders = orders.filter(
+    (o) => o.status === "PENDING"
+  ).length;
+
+  const approvedOrders = orders.filter(
+    (o) => o.status === "APPROVED"
+  ).length;
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "60vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
 
       {/* HEADER */}
       <Box
@@ -65,31 +105,117 @@ export default function Orders() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
           flexWrap: "wrap",
           gap: 2,
+          mb: 3,
         }}
       >
         <Box>
-          <Typography variant="h5" fontWeight={800}>
+          <Typography
+            variant="h5"
+            fontWeight={800}
+          >
             My Orders
           </Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            Manage and track all created orders
+          <Typography
+            variant="body2"
+            color="text.secondary"
+          >
+            View and manage warehouse orders.
           </Typography>
         </Box>
 
-        {/* <Button
+        {/* Enable if required */}
+        {/*
+        <Button
           variant="contained"
           startIcon={<AddShoppingCartIcon />}
-          onClick={() => navigate("/staff/orders/create")}
+          onClick={() =>
+            navigate("/staff/orders/create")
+          }
         >
           Create Order
-        </Button> */}
+        </Button>
+        */}
       </Box>
 
-      {/* SEARCH + KPI */}
+      {/* KPI CARDS */}
+      <Grid
+        container
+        spacing={3}
+        sx={{ mb: 3 }}
+      >
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Total Orders
+              </Typography>
+
+              <Typography
+                variant="h4"
+                fontWeight={800}
+              >
+                {totalOrders}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Pending Orders
+              </Typography>
+
+              <Chip
+                icon={<PendingActionsIcon />}
+                label={pendingOrders}
+                color="warning"
+                sx={{ mt: 1 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Approved Orders
+              </Typography>
+
+              <Chip
+                icon={<CheckCircleIcon />}
+                label={approvedOrders}
+                color="success"
+                sx={{ mt: 1 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* SEARCH */}
+      <TextField
+        fullWidth
+        placeholder="Search by Order ID, Customer, Warehouse or Status..."
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        sx={{ mb: 3 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
+            {/* SEARCH + KPI */}
       <Box
         sx={{
           display: "flex",
@@ -115,14 +241,23 @@ export default function Orders() {
           }}
         />
 
-        <Card sx={{ minWidth: 180 }}>
+        <Card
+          sx={{
+            minWidth: 180,
+            borderRadius: 3,
+            boxShadow: 2,
+          }}
+        >
           <CardContent>
-            <Typography color="text.secondary">
+            <Typography
+              color="text.secondary"
+              variant="body2"
+            >
               Total Orders
             </Typography>
 
             <Typography
-              variant="h6"
+              variant="h5"
               fontWeight={800}
             >
               {orders.length}
@@ -130,14 +265,23 @@ export default function Orders() {
           </CardContent>
         </Card>
 
-        <Card sx={{ minWidth: 180 }}>
+        <Card
+          sx={{
+            minWidth: 180,
+            borderRadius: 3,
+            boxShadow: 2,
+          }}
+        >
           <CardContent>
-            <Typography color="text.secondary">
-              Visible
+            <Typography
+              color="text.secondary"
+              variant="body2"
+            >
+              Visible Results
             </Typography>
 
             <Typography
-              variant="h6"
+              variant="h5"
               fontWeight={800}
             >
               {filteredOrders.length}
@@ -151,6 +295,8 @@ export default function Orders() {
         component={Paper}
         sx={{
           borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: 3,
         }}
       >
         <Table>
@@ -158,39 +304,41 @@ export default function Orders() {
           <TableHead>
             <TableRow
               sx={{
-                bgcolor: "#f8fafc",
+                bgcolor: "#2563eb",
+                "& th": {
+                  color: "#fff",
+                  fontWeight: 700,
+                },
               }}
             >
-              <TableCell>
-                <b>Order ID</b>
-              </TableCell>
+              <TableCell>Order ID</TableCell>
 
-              <TableCell>
-                <b>Customer</b>
-              </TableCell>
+              <TableCell>Customer</TableCell>
 
-              <TableCell>
-                <b>Warehouse</b>
-              </TableCell>
+              <TableCell>Warehouse</TableCell>
 
-              <TableCell>
-                <b>Total</b>
-              </TableCell>
+              <TableCell>Total</TableCell>
 
-              <TableCell>
-                <b>Status</b>
-              </TableCell>
+              <TableCell>Status</TableCell>
 
               <TableCell align="right">
-                <b>Action</b>
+                Action
               </TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {filteredOrders.map((o) => (
-              <TableRow hover key={o.id}>
-                <TableCell>
+                        {filteredOrders.map((o) => (
+              <TableRow
+                hover
+                key={o.id}
+                sx={{
+                  "&:hover": {
+                    bgcolor: "#f8fafc",
+                  },
+                }}
+              >
+                <TableCell sx={{ fontWeight: 700 }}>
                   #{o.id}
                 </TableCell>
 
@@ -202,13 +350,14 @@ export default function Orders() {
                   {o.warehouse_id}
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>
                   ₹{o.total_amount}
                 </TableCell>
 
                 <TableCell>
                   <Chip
                     label={o.status}
+                    size="small"
                     color={
                       o.status === "APPROVED"
                         ? "success"
@@ -216,19 +365,18 @@ export default function Orders() {
                         ? "error"
                         : "warning"
                     }
-                    size="small"
                   />
                 </TableCell>
 
                 <TableCell align="right">
                   <Button
                     size="small"
-                    variant="outlined"
+                    variant="contained"
                     onClick={() =>
                       navigate(`/staff/orders/${o.id}`)
                     }
                   >
-                    View
+                    View Details
                   </Button>
                 </TableCell>
               </TableRow>
@@ -237,27 +385,44 @@ export default function Orders() {
 
         </Table>
       </TableContainer>
-
+            {/* EMPTY STATE */}
       {filteredOrders.length === 0 && (
         <Box
           sx={{
             textAlign: "center",
-            mt: 5,
+            mt: 6,
+            py: 6,
           }}
         >
           <ReceiptLongIcon
             sx={{
-              fontSize: 60,
+              fontSize: 70,
               color: "#cbd5e1",
+              mb: 2,
             }}
           />
 
           <Typography
-            color="text.secondary"
-            mt={1}
+            variant="h6"
+            fontWeight={700}
+            gutterBottom
           >
-            No orders found
+            No Orders Found
           </Typography>
+
+          <Typography
+            color="text.secondary"
+            sx={{ mb: 3 }}
+          >
+            No orders match your search criteria.
+          </Typography>
+
+          <Button
+            variant="outlined"
+            onClick={() => setSearch("")}
+          >
+            Clear Search
+          </Button>
         </Box>
       )}
     </Box>

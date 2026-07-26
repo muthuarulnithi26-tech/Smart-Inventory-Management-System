@@ -4,21 +4,20 @@ import {
   Box,
   Typography,
   Grid,
-  Card,
-  CardContent,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  Chip,
-  CircularProgress,
 } from "@mui/material";
 
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 import {
   getStock,
@@ -26,9 +25,15 @@ import {
   removeStock,
 } from "../../api/stock.api";
 
+import PageHeader from "../../components/common/PageHeader";
+import StatCard from "../../components/common/StatCard";
+import DashboardSkeleton from "../../components/common/DashboardSkeleton";
+
 export default function StockPage() {
   const [stock, setStock] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openRemove, setOpenRemove] = useState(false);
@@ -39,288 +44,506 @@ export default function StockPage() {
     quantity: "",
   });
 
-  useEffect(() => {
-    loadStock();
-  }, []);
-
   const loadStock = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       const warehouseId = 1;
+
       const data = await getStock(warehouseId);
 
       setStock(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
+
+      setError(
+        err.response?.data?.message ||
+        "Failed to load stock data."
+      );
+
       setStock([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddStock = async () => {
-    await addStock({
-      ...form,
-      quantity: Number(form.quantity),
-    });
-
-    setOpenAdd(false);
-    setForm({ warehouse_id: "", product_id: "", quantity: "" });
+  useEffect(() => {
     loadStock();
+  }, []);
+
+  const handleAddStock = async () => {
+    try {
+      await addStock({
+        ...form,
+        quantity: Number(form.quantity),
+      });
+
+      setOpenAdd(false);
+
+      setForm({
+        warehouse_id: "",
+        product_id: "",
+        quantity: "",
+      });
+
+      loadStock();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleRemoveStock = async () => {
-    await removeStock({
-      ...form,
-      quantity: Number(form.quantity),
-    });
+    try {
+      await removeStock({
+        ...form,
+        quantity: Number(form.quantity),
+      });
 
-    setOpenRemove(false);
-    setForm({ warehouse_id: "", product_id: "", quantity: "" });
-    loadStock();
+      setOpenRemove(false);
+
+      setForm({
+        warehouse_id: "",
+        product_id: "",
+        quantity: "",
+      });
+
+      loadStock();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const totalItems = stock.reduce(
-    (acc, s) => acc + (Number(s.quantity) || 0),
+    (total, item) => total + (Number(item.quantity) || 0),
     0
   );
 
   if (loading) {
+    return <DashboardSkeleton cardCount={3} />;
+  }
+
+  if (error) {
     return (
-      <Box
-        sx={{
-          height: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <CircularProgress />
+      <Box sx={{ textAlign: "center", py: 10 }}>
+        <ErrorOutlineIcon
+          sx={{
+            fontSize: 48,
+            color: "error.main",
+            mb: 1,
+          }}
+        />
+
+        <Typography
+          color="error"
+          fontWeight={600}
+        >
+          {error}
+        </Typography>
+
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={loadStock}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
       </Box>
     );
   }
 
-  return (
-    <Box sx={{ width: "100%" }}>
+  const cards = [
+    {
+      label: "Stock Records",
+      value: stock.length,
+      icon: <InventoryIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#1976d2,#42a5f5)",
+    },
+    {
+      label: "Total Quantity",
+      value: totalItems,
+      icon: <AddBoxIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#16a34a,#4ade80)",
+    },
+    {
+      label: "System Status",
+      value: "Active",
+      icon: <CheckCircleIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#7c3aed,#a78bfa)",
+    },
+  ];
 
-      {/* HEADER */}
+  return (
+    <Box>
+            {/* PAGE HEADER */}
+      <PageHeader
+        title="Inventory Management"
+        subtitle="Manage warehouse stock levels and inventory movements"
+      />
+
+      {/* ACTION BUTTONS */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 2,
           mb: 3,
           flexWrap: "wrap",
-          gap: 2,
         }}
       >
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Inventory Management
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage warehouse stock levels and movements
-          </Typography>
-        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddBoxIcon />}
+          onClick={() => setOpenAdd(true)}
+        >
+          Add Stock
+        </Button>
 
-        <Box>
-          <Button
-            variant="contained"
-            startIcon={<AddBoxIcon />}
-            sx={{ mr: 2 }}
-            onClick={() => setOpenAdd(true)}
-          >
-            Add Stock
-          </Button>
-
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<RemoveCircleIcon />}
-            onClick={() => setOpenRemove(true)}
-          >
-            Remove Stock
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<RemoveCircleIcon />}
+          onClick={() => setOpenRemove(true)}
+        >
+          Remove Stock
+        </Button>
       </Box>
 
-      {/* KPI */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ display: "flex", gap: 2 }}>
-              <InventoryIcon sx={{ fontSize: 35, color: "#2563eb" }} />
-              <Box>
-                <Typography color="text.secondary">
-                  Total Stock Records
-                </Typography>
-                <Typography variant="h5" fontWeight={800}>
-                  {stock.length}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography color="text.secondary">
-                Total Quantity
-              </Typography>
-              <Typography variant="h5" fontWeight={800}>
-                {totalItems}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Chip label="System Active" color="success" />
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* KPI CARDS */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {cards.map((card) => (
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            key={card.label}
+          >
+            <StatCard {...card} />
+          </Grid>
+        ))}
       </Grid>
 
-      {/* STOCK TABLE (CLEAN VERSION) */}
-        {/* STOCK TABLE (CLEAN TABLE VIEW) */}
-<Box sx={{ mt: 2, overflowX: "auto" }}>
+      {/* STOCK TABLE */}
+      <Box
+        sx={{
+          p: 3,
+          borderRadius: 4,
+          bgcolor: "background.paper",
+          boxShadow: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          gutterBottom
+        >
+          Current Inventory
+        </Typography>
 
-  {/* HEADER */}
-  <Box
-    sx={{
-      display: "grid",
-      gridTemplateColumns: "80px 1fr 1fr 120px",
-      fontWeight: 800,
-      p: 2,
-      bgcolor: "#f1f5f9",
-      borderRadius: 2,
-      minWidth: 700,
-    }}
-  >
-    <Box>ID</Box>
-    <Box>Product Name</Box>
-    <Box>Warehouse</Box>
-    <Box>Quantity</Box>
-  </Box>
+        <Box sx={{ overflowX: "auto" }}>
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              borderCollapse: "collapse",
+              minWidth: 750,
+            }}
+          >
+            {/* TABLE HEADER */}
+            <Box component="thead">
+              <Box
+                component="tr"
+                sx={{
+                  backgroundColor: "#f8fafc",
+                }}
+              >
+                {[
+                  "ID",
+                  "Product",
+                  "Warehouse",
+                  "Quantity",
+                ].map((header) => (
+                  <Box
+                    component="th"
+                    key={header}
+                    sx={{
+                      textAlign: "left",
+                      p: 2,
+                      fontWeight: 700,
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    {header}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
 
-  {stock.map((s) => (
-  <Box
-    key={s.id}
-    sx={{
-      display: "grid",
-      gridTemplateColumns: "80px 1fr 1fr 120px",
-      p: 2,
-      borderBottom: "1px solid #e2e8f0",
-      alignItems: "center",
-      minWidth: 700,
-      "&:hover": { bgcolor: "#f8fafc" },
-    }}
-  >
-    <Box sx={{ fontWeight: 700 }}>
-      #{s.id}
-    </Box>
+            {/* TABLE BODY */}
+            <Box component="tbody">
+                            {stock.map((item) => (
+                <Box
+                  component="tr"
+                  key={item.id}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "#f9fafb",
+                    },
+                  }}
+                >
+                  <Box
+                    component="td"
+                    sx={{
+                      p: 2,
+                      borderBottom: "1px solid #f1f5f9",
+                      fontWeight: 700,
+                    }}
+                  >
+                    #{item.id}
+                  </Box>
 
-    <Box sx={{ fontWeight: 600 }}>
-      {s.product_name}
-    </Box>
+                  <Box
+                    component="td"
+                    sx={{
+                      p: 2,
+                      borderBottom: "1px solid #f1f5f9",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {item.product_name}
+                  </Box>
 
-    <Box>
-      {s.warehouse_id}
-    </Box>
+                  <Box
+                    component="td"
+                    sx={{
+                      p: 2,
+                      borderBottom: "1px solid #f1f5f9",
+                    }}
+                  >
+                    {item.warehouse_id}
+                  </Box>
 
-    <Box>
-      <Chip label={s.quantity} color="primary" size="small" />
-    </Box>
-  </Box>
-))}
-</Box>
-      {/* EMPTY */}
-      {!stock.length && (
-        <Box sx={{ textAlign: "center", mt: 6 }}>
-          <Typography color="text.secondary">
-            No stock data found
-          </Typography>
+                  <Box
+                    component="td"
+                    sx={{
+                      p: 2,
+                      borderBottom: "1px solid #f1f5f9",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 10,
+                        bgcolor: "primary.main",
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: 13,
+                      }}
+                    >
+                      {item.quantity}
+                    </Box>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
         </Box>
-      )}
 
-      {/* ADD STOCK */}
-      <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth>
+        {/* EMPTY STATE */}
+        {stock.length === 0 && (
+          <Box
+            sx={{
+              py: 8,
+              textAlign: "center",
+            }}
+          >
+            <InventoryIcon
+              sx={{
+                fontSize: 60,
+                color: "text.disabled",
+                mb: 2,
+              }}
+            />
+
+            <Typography
+              variant="h6"
+              fontWeight={700}
+            >
+              No Stock Records Found
+            </Typography>
+
+            <Typography color="text.secondary">
+              There is currently no inventory available for this warehouse.
+            </Typography>
+          </Box>
+        )}
+      </Box>
+            {/* ADD STOCK DIALOG */}
+      <Dialog
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Add Stock</DialogTitle>
 
-        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{
+            display: "grid",
+            gap: 2,
+            mt: 1,
+          }}
+        >
           <TextField
             label="Warehouse ID"
+            fullWidth
             value={form.warehouse_id}
             onChange={(e) =>
-              setForm({ ...form, warehouse_id: e.target.value })
+              setForm({
+                ...form,
+                warehouse_id: e.target.value,
+              })
             }
           />
 
           <TextField
             label="Product ID"
+            fullWidth
             value={form.product_id}
             onChange={(e) =>
-              setForm({ ...form, product_id: e.target.value })
+              setForm({
+                ...form,
+                product_id: e.target.value,
+              })
             }
           />
 
           <TextField
             label="Quantity"
             type="number"
+            fullWidth
             value={form.quantity}
             onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
+              setForm({
+                ...form,
+                quantity: e.target.value,
+              })
             }
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddStock}>
-            Save
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            color="inherit"
+            onClick={() => {
+              setOpenAdd(false);
+
+              setForm({
+                warehouse_id: "",
+                product_id: "",
+                quantity: "",
+              });
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddBoxIcon />}
+            onClick={handleAddStock}
+          >
+            Add Stock
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* REMOVE STOCK */}
-      <Dialog open={openRemove} onClose={() => setOpenRemove(false)} fullWidth>
+      {/* REMOVE STOCK DIALOG */}
+      <Dialog
+        open={openRemove}
+        onClose={() => setOpenRemove(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Remove Stock</DialogTitle>
 
-        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{
+            display: "grid",
+            gap: 2,
+            mt: 1,
+          }}
+        >
           <TextField
             label="Warehouse ID"
+            fullWidth
             value={form.warehouse_id}
             onChange={(e) =>
-              setForm({ ...form, warehouse_id: e.target.value })
+              setForm({
+                ...form,
+                warehouse_id: e.target.value,
+              })
             }
           />
 
           <TextField
             label="Product ID"
+            fullWidth
             value={form.product_id}
             onChange={(e) =>
-              setForm({ ...form, product_id: e.target.value })
+              setForm({
+                ...form,
+                product_id: e.target.value,
+              })
             }
           />
 
           <TextField
             label="Quantity"
             type="number"
+            fullWidth
             value={form.quantity}
             onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
+              setForm({
+                ...form,
+                quantity: e.target.value,
+              })
             }
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenRemove(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleRemoveStock}>
-            Remove
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            color="inherit"
+            onClick={() => {
+              setOpenRemove(false);
+
+              setForm({
+                warehouse_id: "",
+                product_id: "",
+                quantity: "",
+              });
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<RemoveCircleIcon />}
+            onClick={handleRemoveStock}
+          >
+            Remove Stock
           </Button>
         </DialogActions>
       </Dialog>

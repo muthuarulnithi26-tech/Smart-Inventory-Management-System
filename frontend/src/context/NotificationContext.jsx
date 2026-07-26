@@ -1,5 +1,15 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { Snackbar, Alert } from "@mui/material";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
 /**
  * Global success/error/info notification system.
@@ -22,20 +32,38 @@ export function NotificationProvider({ children }) {
     severity: "success", // success | error | warning | info
   });
 
-  const show = useCallback((message, severity = "success") => {
-    setState({ open: true, message, severity });
-  }, []);
+  const show = useCallback(
+    (message, severity = "success") => {
+      setState({
+        open: true,
+        message,
+        severity,
+      });
+    },
+    []
+  );
 
   const api = useMemo(
     () => ({
       success: (message) => show(message, "success"),
+
       error: (message) => show(message, "error"),
+
       warning: (message) => show(message, "warning"),
+
       info: (message) => show(message, "info"),
-      // Convenience for catch blocks: notify.fromError(err, "Failed to save")
-      fromError: (err, fallback = "Something went wrong") => {
+
+      // Convenience for catch blocks:
+      // notify.fromError(err, "Failed to save")
+      fromError: (
+        err,
+        fallback = "Something went wrong"
+      ) => {
         const message =
-          err?.response?.data?.message || err?.message || fallback;
+          err?.response?.data?.message ||
+          err?.message ||
+          fallback;
+
         show(message, "error");
       },
     }),
@@ -44,7 +72,11 @@ export function NotificationProvider({ children }) {
 
   const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
-    setState((s) => ({ ...s, open: false }));
+
+    setState((s) => ({
+      ...s,
+      open: false,
+    }));
   };
 
   return (
@@ -55,7 +87,10 @@ export function NotificationProvider({ children }) {
         open={state.open}
         autoHideDuration={4000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
       >
         <Alert
           onClose={handleClose}
@@ -72,8 +107,12 @@ export function NotificationProvider({ children }) {
 
 export function useNotify() {
   const ctx = useContext(NotificationContext);
+
   if (!ctx) {
-    throw new Error("useNotify() must be used inside <NotificationProvider>");
+    throw new Error(
+      "useNotify() must be used inside <NotificationProvider>"
+    );
   }
+
   return ctx;
 }

@@ -4,11 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
-  Card,
-  CardContent,
   Typography,
-  CircularProgress,
-  Chip,
   Button,
 } from "@mui/material";
 
@@ -18,50 +14,73 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import LogoutIcon from "@mui/icons-material/Logout";
+
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlined";
+
+import StatCard from "../../components/common/StatCard";
+import DashboardSkeleton from "../../components/common/DashboardSkeleton";
+import MiniBarChart from "../../components/common/MiniBarChart";
 
 import { getManagerDashboard } from "../../api/dashboard.api";
 
 export default function ManagerDashboard() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await getManagerDashboard();
-        setData(res);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+  const load = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await getManagerDashboard();
+      setData(res);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Failed to load dashboard data"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading || !data) {
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (loading) {
+    return <DashboardSkeleton cardCount={6} />;
+  }
+
+  if (error) {
     return (
-      <Box
-        sx={{
-          height: "70vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <CircularProgress />
-        <Typography color="text.secondary">
-          Loading Dashboard...
+      <Box sx={{ textAlign: "center", py: 10 }}>
+        <ErrorOutlineIcon
+          sx={{
+            fontSize: 48,
+            color: "error.main",
+            mb: 1,
+          }}
+        />
+
+        <Typography color="error" fontWeight={600}>
+          {error}
         </Typography>
+
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={load}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
       </Box>
     );
   }
@@ -70,38 +89,57 @@ export default function ManagerDashboard() {
     {
       label: "Warehouse",
       value: data.warehouse_id,
-      icon: <StoreIcon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      icon: <StoreIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#1976d2,#42a5f5)",
     },
     {
-      label: "My Staff",
+      label: "Staff",
       value: data.staff_count,
-      icon: <PeopleIcon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #7b1fa2, #ba68c8)",
+      icon: <PeopleIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#7b1fa2,#ba68c8)",
     },
     {
-      label: "Pending",
+      label: "Pending Orders",
       value: data.pending_orders,
-      icon: <PendingActionsIcon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #f57c00, #ffb74d)",
+      icon: <PendingActionsIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#f57c00,#ffb74d)",
     },
     {
-      label: "Approved",
+      label: "Approved Orders",
       value: data.approved_orders,
-      icon: <CheckCircleIcon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #388e3c, #66bb6a)",
+      icon: <CheckCircleIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#388e3c,#66bb6a)",
     },
     {
-      label: "Stock",
+      label: "Stock Items",
       value: data.stock_items,
-      icon: <Inventory2Icon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #0ea5e9, #38bdf8)",
+      icon: <Inventory2Icon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#0ea5e9,#38bdf8)",
     },
     {
       label: "Shipments",
       value: data.shipments,
-      icon: <LocalShippingIcon sx={{ fontSize: 26 }} />,
-      gradient: "linear-gradient(135deg, #ef4444, #f87171)",
+      icon: <LocalShippingIcon sx={{ fontSize: 30 }} />,
+      gradient:
+        "linear-gradient(135deg,#ef4444,#f87171)",
+    },
+  ];
+
+  const quickActions = [
+    {
+      label: "Manage Orders",
+      icon: <AssignmentIcon />,
+      path: "/manager/orders",
+    },
+    {
+      label: "Inventory",
+      icon: <WarehouseIcon />,
+      path: "/manager/inventory",
     },
   ];
 
@@ -114,7 +152,8 @@ export default function ManagerDashboard() {
           mb: 3,
           p: 3,
           borderRadius: 4,
-          background: "linear-gradient(135deg, #1e293b, #334155)",
+          background:
+            "linear-gradient(135deg,#1e293b,#334155)",
           color: "#fff",
           display: "flex",
           justifyContent: "space-between",
@@ -124,115 +163,175 @@ export default function ManagerDashboard() {
         }}
       >
         <Box>
-          <Typography variant="h5" fontWeight={700}>
+          <Typography variant="h4" fontWeight={700}>
             Manager Dashboard
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            Warehouse operations overview
+
+          <Typography
+            variant="body1"
+            sx={{
+              mt: 1,
+              opacity: 0.85,
+            }}
+          >
+            Monitor warehouse operations, staff,
+            inventory, and order activities from one place.
           </Typography>
         </Box>
 
-        {/* <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Chip
-            label="Manager Panel"
-            sx={{
-              bgcolor: "#1976d2",
-              color: "#fff",
-              fontWeight: 700,
-            }}
-          />
-
-          <Button
-            variant="contained"
-            startIcon={<LogoutIcon />}
-            onClick={handleLogout}
-            sx={{
-              bgcolor: "#1976d2",
-              "&:hover": { bgcolor: "#115293" },
-              fontWeight: 700,
-            }}
-          >
-            Logout
-          </Button>
-        </Box> */}
-      </Box>
-
-      {/* KPI CARDS (FIXED GRID) */}
-      <Grid container spacing={2}>
-        {cards.map((card) => (
-          <Grid item xs={12} sm={6} md={2} key={card.label}>
-            <Card
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1.5,
+            flexWrap: "wrap",
+          }}
+        >
+          {quickActions.map((action) => (
+            <Button
+              key={action.label}
+              variant="contained"
+              startIcon={action.icon}
+              onClick={() => navigate(action.path)}
               sx={{
-                borderRadius: 3,
-                color: "#fff",
-                background: card.gradient,
-                height: 120,
-                display: "flex",
-                alignItems: "center",
-                boxShadow: 4,
-                transition: "0.25s",
+                bgcolor: "rgba(255,255,255,0.12)",
                 "&:hover": {
-                  transform: "translateY(-5px)",
-                  boxShadow: 8,
+                  bgcolor: "rgba(255,255,255,0.22)",
                 },
               }}
             >
-              <CardContent
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  p: 2,
-                  "&:last-child": { pb: 2 },
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{ opacity: 0.9, fontWeight: 600 }}
-                  >
-                    {card.label}
-                  </Typography>
-
-                  <Typography
-                    variant="h5"
-                    fontWeight={800}
-                  >
-                    {card.value ?? 0}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    opacity: 0.9,
-                  }}
-                >
-                  {card.icon}
-                </Box>
-              </CardContent>
-            </Card>
+              {action.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
+            {/* STAT CARDS */}
+      <Grid container spacing={3}>
+        {cards.map((card) => (
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={2}
+            key={card.label}
+          >
+            <StatCard {...card} />
           </Grid>
         ))}
       </Grid>
 
-      {/* QUICK SUMMARY (compact) */}
+      {/* CHARTS */}
+      <Grid container spacing={3} sx={{ mt: 0.5 }}>
+        {/* Order Status */}
+        <Grid item xs={12} md={6}>
+          <Box
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              height: "100%",
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              gutterBottom
+            >
+              Order Status
+            </Typography>
+
+            <MiniBarChart
+              data={[
+                {
+                  label: "Pending",
+                  value: data.pending_orders ?? 0,
+                  color: "#f59e0b",
+                },
+                {
+                  label: "Approved",
+                  value: data.approved_orders ?? 0,
+                  color: "#22c55e",
+                },
+              ]}
+            />
+          </Box>
+        </Grid>
+
+        {/* Warehouse Overview */}
+        <Grid item xs={12} md={6}>
+          <Box
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              height: "100%",
+            }}
+          >
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              gutterBottom
+            >
+              Warehouse Overview
+            </Typography>
+
+            <MiniBarChart
+              data={[
+                {
+                  label: "Staff",
+                  value: data.staff_count ?? 0,
+                  color: "#7c3aed",
+                },
+                {
+                  label: "Stock",
+                  value: data.stock_items ?? 0,
+                  color: "#2563eb",
+                },
+                {
+                  label: "Shipments",
+                  value: data.shipments ?? 0,
+                  color: "#ef4444",
+                },
+              ]}
+            />
+          </Box>
+        </Grid>
+      </Grid>
+            {/* QUICK SUMMARY */}
       <Box
         sx={{
           mt: 3,
-          p: 2,
-          bgcolor: "#fff",
-          borderRadius: 3,
-          boxShadow: 2,
+          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: 4,
+          boxShadow: 3,
         }}
       >
-        <Typography variant="subtitle1" fontWeight={700}>
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          gutterBottom
+        >
           Quick Summary
         </Typography>
 
-        <Typography variant="body2" color="text.secondary">
-          Warehouse: {data.warehouse_id} | Staff: {data.staff_count} | Pending:{" "}
-          {data.pending_orders} | Approved: {data.approved_orders}
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ lineHeight: 1.8 }}
+        >
+          You are currently managing{" "}
+          <strong>Warehouse #{data.warehouse_id}</strong>.
+          This warehouse has{" "}
+          <strong>{data.staff_count}</strong> staff members,
+          <strong> {data.stock_items}</strong> stock items,
+          <strong> {data.pending_orders}</strong> pending
+          orders,
+          <strong> {data.approved_orders}</strong> approved
+          orders, and
+          <strong> {data.shipments}</strong> shipments.
         </Typography>
       </Box>
 

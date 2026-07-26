@@ -1,12 +1,22 @@
 import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 
-import AppSidebar, { SIDEBAR_WIDTH } from "../components/sidebar/AppSidebar";
+import AppSidebar, {
+  SIDEBAR_WIDTH,
+} from "../components/sidebar/AppSidebar";
+
 import Navbar from "../components/navbar/Navbar";
 
 export default function AdminLayout() {
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", width: "100%", bgcolor: "#f8fafc" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        width: "100%",
+        bgcolor: "#f8fafc",
+      }}
+    >
       <AppSidebar role="admin" />
 
       <Box
@@ -14,14 +24,26 @@ export default function AdminLayout() {
         sx={{
           flexGrow: 1,
           minWidth: 0,
-          width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+          width: {
+            md: `calc(100% - ${SIDEBAR_WIDTH}px)`,
+          },
           display: "flex",
           flexDirection: "column",
         }}
       >
         <Navbar />
 
-        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3 }, width: "100%", boxSizing: "border-box" }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            p: {
+              xs: 2,
+              sm: 3,
+            },
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           <Outlet />
         </Box>
       </Box>

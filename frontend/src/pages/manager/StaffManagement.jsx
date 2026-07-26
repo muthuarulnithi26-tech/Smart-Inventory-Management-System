@@ -23,10 +23,15 @@ import AddIcon from "@mui/icons-material/Add";
 
 import { createStaff, getMyStaff } from "../../api/manager.api";
 
+
 export default function StaffManagement() {
+
   const [staff, setStaff] = useState([]);
+
   const [open, setOpen] = useState(false);
+
   const [loading, setLoading] = useState(true);
+
 
   const [form, setForm] = useState({
     name: "",
@@ -34,25 +39,38 @@ export default function StaffManagement() {
     password: "",
   });
 
+
   useEffect(() => {
     loadStaff();
   }, []);
 
+
   const loadStaff = async () => {
     try {
       setLoading(true);
+
       const data = await getMyStaff();
+
       setStaff(Array.isArray(data) ? data : []);
+
     } catch (err) {
+
       console.log(err);
+
       setStaff([]);
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
+
   const handleCreate = async () => {
+
     await createStaff(form);
+
 
     setForm({
       name: "",
@@ -60,14 +78,17 @@ export default function StaffManagement() {
       password: "",
     });
 
+
     setOpen(false);
+
     loadStaff();
+
   };
-
   const total = staff.length;
-
   if (loading) {
+
     return (
+
       <Box
         sx={{
           height: "60vh",
@@ -76,12 +97,18 @@ export default function StaffManagement() {
           justifyContent: "center",
         }}
       >
+
         <CircularProgress />
+
       </Box>
+
     );
+
   }
+// ================= PART 2 START =================
 
   return (
+
     <Box sx={{ width: "100%" }}>
 
       {/* HEADER */}
@@ -99,6 +126,7 @@ export default function StaffManagement() {
           <Typography variant="h5" fontWeight={800}>
             Staff Management
           </Typography>
+
           <Typography variant="body2" color="text.secondary">
             Manage your warehouse staff members
           </Typography>
@@ -113,110 +141,174 @@ export default function StaffManagement() {
         </Button>
       </Box>
 
+
       {/* KPI */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
+
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              <GroupIcon sx={{ fontSize: 35, color: "#2563eb" }} />
+            <CardContent
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <GroupIcon
+                sx={{
+                  fontSize: 35,
+                  color: "#2563eb",
+                }}
+              />
+
               <Box>
                 <Typography color="text.secondary">
                   Total Staff
                 </Typography>
-                <Typography variant="h5" fontWeight={800}>
+
+                <Typography
+                  variant="h5"
+                  fontWeight={800}
+                >
                   {total}
                 </Typography>
               </Box>
+
             </CardContent>
           </Card>
         </Grid>
 
+
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
+
               <Typography color="text.secondary">
                 System Status
               </Typography>
-              <Chip label="Active" color="success" sx={{ mt: 1 }} />
+
+              <Chip
+                label="Active"
+                color="success"
+                sx={{ mt: 1 }}
+              />
+
             </CardContent>
           </Card>
         </Grid>
+
 
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
+
               <Typography color="text.secondary">
                 Role
               </Typography>
-              <Chip label="Staff Users" color="primary" sx={{ mt: 1 }} />
+
+              <Chip
+                label="Staff Users"
+                color="primary"
+                sx={{ mt: 1 }}
+              />
+
             </CardContent>
           </Card>
         </Grid>
+
       </Grid>
 
-          {/* STAFF TABLE STYLE LIST */}
-<Box sx={{ mt: 2, overflowX: "auto" }}>
-  <Box
-    sx={{
-      display: "grid",
-      gridTemplateColumns: "1fr 2fr 1fr",
-      fontWeight: 800,
-      p: 2,
-      bgcolor: "#f1f5f9",
-      borderRadius: 2,
-    }}
-  >
-    <Box>Name</Box>
-    <Box>Email</Box>
-    <Box>Role</Box>
-  </Box>
 
-  {staff.map((user) => (
-    <Box
-      key={user.id}
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 2fr 1fr",
-        p: 2,
-        borderBottom: "1px solid #e2e8f0",
-        alignItems: "center",
-        "&:hover": {
-          bgcolor: "#f8fafc",
-        },
-      }}
-    >
-      {/* NAME */}
-      <Box sx={{ fontWeight: 600 }}>
-        {user.name}
+      {/* STAFF TABLE STYLE LIST */}
+      <Box sx={{ mt: 2, overflowX: "auto" }}>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2fr 1fr",
+            fontWeight: 800,
+            p: 2,
+            bgcolor: "#f1f5f9",
+            borderRadius: 2,
+          }}
+        >
+          <Box>Name</Box>
+          <Box>Email</Box>
+          <Box>Role</Box>
+        </Box>
+// ================= PART 3 START =================
+
+        {staff.map((user) => (
+
+          <Box
+            key={user.id}
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 2fr 1fr",
+              p: 2,
+              borderBottom: "1px solid #e2e8f0",
+              alignItems: "center",
+              "&:hover": {
+                bgcolor: "#f8fafc",
+              },
+            }}
+          >
+
+            {/* NAME */}
+            <Box sx={{ fontWeight: 600 }}>
+              {user.name}
+            </Box>
+
+
+            {/* EMAIL */}
+            <Box sx={{ color: "text.secondary" }}>
+              {user.email}
+            </Box>
+
+
+            {/* ROLE */}
+            <Box>
+              <Chip
+                label={user.role || "staff"}
+                size="small"
+                color="primary"
+              />
+            </Box>
+
+          </Box>
+
+        ))}
+
       </Box>
 
-      {/* EMAIL */}
-      <Box sx={{ color: "text.secondary" }}>
-        {user.email}
-      </Box>
 
-      {/* ROLE */}
-      <Box>
-        <Chip
-          label={user.role || "staff"}
-          size="small"
-          color="primary"
-        />
-      </Box>
-    </Box>
-  ))}
-</Box>
+      {/* CREATE STAFF DIALOG */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+      >
 
-      {/* DIALOG */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Create Staff</DialogTitle>
+        <DialogTitle>
+          Create Staff
+        </DialogTitle>
 
-        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{
+            display: "grid",
+            gap: 2,
+            mt: 1,
+          }}
+        >
+
           <TextField
             label="Name"
             value={form.name}
             onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
             }
           />
 
@@ -224,26 +316,43 @@ export default function StaffManagement() {
             label="Email"
             value={form.email}
             onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
             }
           />
+// ================= PART 4 START =================
 
           <TextField
             label="Password"
             type="password"
             value={form.password}
             onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
             }
           />
+
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate}>
+
+          <Button onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+          >
             Create
           </Button>
+
         </DialogActions>
+
       </Dialog>
 
     </Box>

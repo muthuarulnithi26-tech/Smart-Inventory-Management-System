@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardContent,
   Button,
@@ -12,13 +11,18 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Chip,
   InputAdornment,
   CircularProgress,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Paper,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
@@ -61,16 +65,21 @@ export default function Products() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
+
     if (!q) return products;
 
     return products.filter((p) =>
-      `${p.name} ${p.sku} ${p.unit}`.toLowerCase().includes(q)
+      `${p.name} ${p.sku} ${p.unit}`
+        .toLowerCase()
+        .includes(q)
     );
   }, [products, search]);
 
   const handleCreate = async () => {
     await createProduct(form);
+
     setOpen(false);
+
     setForm({
       name: "",
       sku: "",
@@ -78,56 +87,40 @@ export default function Products() {
       purchase_price: "",
       selling_price: "",
     });
+
     loadProducts();
   };
 
-  const totalProfit = filtered.reduce((acc, p) => {
-    return (
+  const totalProfit = filtered.reduce(
+    (acc, p) =>
       acc +
-      (Number(p.selling_price || 0) - Number(p.purchase_price || 0))
-    );
-  }, 0);
+      (Number(p.selling_price || 0) -
+        Number(p.purchase_price || 0)),
+    0
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
 
-      {/* HEADER */}
+      {/* SEARCH + KPI */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          gap: 2,
           mb: 3,
           flexWrap: "wrap",
-          gap: 2,
         }}
       >
-        {/* <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Product Management
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage inventory products and pricing
-          </Typography>
-        </Box> */}
-
-        {/* <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
-        >
-          Add Product
-        </Button> */}
-      </Box>
-
-      {/* SEARCH + KPI */}
-      <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-
         <TextField
           placeholder="Search products..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ flex: 1, minWidth: 250 }}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          sx={{
+            flex: 1,
+            minWidth: 260,
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -137,178 +130,275 @@ export default function Products() {
           }}
         />
 
-        <Card sx={{ minWidth: 180 }}>
+        <Card
+          sx={{
+            minWidth: 190,
+            borderRadius: 3,
+            boxShadow: 2,
+          }}
+        >
           <CardContent>
-            <Typography color="text.secondary">
+            <Typography
+              color="text.secondary"
+              variant="body2"
+            >
               Total Products
             </Typography>
-            <Typography variant="h6" fontWeight={800}>
+
+            <Typography
+              variant="h5"
+              fontWeight={800}
+            >
               {filtered.length}
             </Typography>
           </CardContent>
         </Card>
 
-        <Card sx={{ minWidth: 180 }}>
+        <Card
+          sx={{
+            minWidth: 190,
+            borderRadius: 3,
+            boxShadow: 2,
+          }}
+        >
           <CardContent>
-            <Typography color="text.secondary">
+            <Typography
+              color="text.secondary"
+              variant="body2"
+            >
               Total Profit
             </Typography>
-            <Typography variant="h6" fontWeight={800} color="success.main">
+
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="success.main"
+            >
               ₹{totalProfit}
             </Typography>
           </CardContent>
         </Card>
-
       </Box>
-        {/* LOADING */}
-{loading ? (
-  <Box
-    sx={{
-      height: "40vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <CircularProgress />
-  </Box>
-) : (
-  <>
-    {/* TABLE VIEW */}
-    <Box sx={{ overflowX: "auto" }}>
+            {/* LOADING */}
+      {loading ? (
+        <Box
+          sx={{
+            height: "45vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {/* TABLE */}
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 3,
+              overflow: "hidden",
+              boxShadow: 3,
+            }}
+          >
+            <Table>
 
-      <Box
-        component="table"
-        sx={{
-          width: "100%",
-          borderCollapse: "collapse",
-          minWidth: 800,
-          backgroundColor: "#fff",
-          borderRadius: 2,
-          boxShadow: 2,
-          overflow: "hidden",
-        }}
+              <TableHead>
+                <TableRow
+                  sx={{
+                    bgcolor: "#2563eb",
+                    "& th": {
+                      color: "#fff",
+                      fontWeight: 700,
+                    },
+                  }}
+                >
+                  <TableCell>Name</TableCell>
+
+                  <TableCell>SKU</TableCell>
+
+                  <TableCell>Unit</TableCell>
+
+                  <TableCell>Purchase Price</TableCell>
+
+                  <TableCell>Selling Price</TableCell>
+
+                  <TableCell align="right">
+                    Profit
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {filtered.map((product) => {
+                  const profit =
+                    Number(product.selling_price || 0) -
+                    Number(product.purchase_price || 0);
+
+                  return (
+                    <TableRow
+                      hover
+                      key={product.id}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: "#f8fafc",
+                        },
+                      }}
+                    >
+                      <TableCell sx={{ fontWeight: 700 }}>
+                        {product.name}
+                      </TableCell>
+
+                      <TableCell>
+                        {product.sku}
+                      </TableCell>
+
+                      <TableCell>
+                        {product.unit}
+                      </TableCell>
+
+                      <TableCell>
+                        ₹{product.purchase_price}
+                      </TableCell>
+
+                      <TableCell>
+                        ₹{product.selling_price}
+                      </TableCell>
+
+                      <TableCell align="right">
+                        <Typography
+                          fontWeight={700}
+                          color={
+                            profit >= 0
+                              ? "success.main"
+                              : "error.main"
+                          }
+                        >
+                          ₹{profit}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+
+            </Table>
+          </TableContainer>
+                    {/* EMPTY STATE */}
+          {filtered.length === 0 && (
+            <Box
+              sx={{
+                textAlign: "center",
+                mt: 6,
+                py: 6,
+              }}
+            >
+              <Inventory2Icon
+                sx={{
+                  fontSize: 70,
+                  color: "#cbd5e1",
+                  mb: 2,
+                }}
+              />
+
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                gutterBottom
+              >
+                No Products Found
+              </Typography>
+
+              <Typography
+                color="text.secondary"
+                sx={{ mb: 3 }}
+              >
+                No products match your current search.
+              </Typography>
+
+              <Button
+                variant="outlined"
+                onClick={() => setSearch("")}
+              >
+                Clear Search
+              </Button>
+            </Box>
+          )}
+        </>
+      )}
+
+      {/* ADD PRODUCT DIALOG */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="sm"
       >
+        <DialogTitle>
+          Add Product
+        </DialogTitle>
 
-        {/* HEADER */}
-        <Box component="thead" sx={{ backgroundColor: "#f1f5f9" }}>
-          <Box component="tr">
-            {["Name", "SKU", "Unit", "Purchase", "Selling", "Profit"].map((h) => (
-              <Box
-                component="th"
-                key={h}
-                sx={{
-                  textAlign: "left",
-                  padding: "12px",
-                  fontWeight: 700,
-                  color: "#334155",
-                  borderBottom: "1px solid #e2e8f0",
-                }}
-              >
-                {h}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-
-        {/* BODY */}
-        <Box component="tbody">
-          {filtered.map((p) => {
-            const profit =
-              Number(p.selling_price || 0) -
-              Number(p.purchase_price || 0);
-
-            return (
-              <Box
-                component="tr"
-                key={p.id}
-                sx={{
-                  "&:hover": { backgroundColor: "#f8fafc" },
-                  borderBottom: "1px solid #e2e8f0",
-                }}
-              >
-                <Box component="td" sx={{ padding: "12px", fontWeight: 600 }}>
-                  {p.name}
-                </Box>
-
-                <Box component="td" sx={{ padding: "12px" }}>
-                  {p.sku}
-                </Box>
-
-                <Box component="td" sx={{ padding: "12px" }}>
-                  {p.unit}
-                </Box>
-
-                <Box component="td" sx={{ padding: "12px" }}>
-                  ₹{p.purchase_price}
-                </Box>
-
-                <Box component="td" sx={{ padding: "12px" }}>
-                  ₹{p.selling_price}
-                </Box>
-
-                <Box component="td" sx={{ padding: "12px" }}>
-                  <Typography
-                    fontWeight={700}
-                    color={profit >= 0 ? "success.main" : "error.main"}
-                  >
-                    ₹{profit}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-    </Box>
-
-    {/* EMPTY STATE */}
-    {filtered.length === 0 && (
-      <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography color="text.secondary">
-          No products found
-        </Typography>
-      </Box>
-    )}
-  </>
-)}
-
-      {/* DIALOG */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
-        <DialogTitle>Add Product</DialogTitle>
-
-        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{
+            display: "grid",
+            gap: 2,
+            mt: 1,
+          }}
+        >
           <TextField
-            label="Name"
+            label="Product Name"
             value={form.name}
             onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
             }
+            fullWidth
           />
 
           <TextField
             label="SKU"
             value={form.sku}
             onChange={(e) =>
-              setForm({ ...form, sku: e.target.value })
+              setForm({
+                ...form,
+                sku: e.target.value,
+              })
             }
+            fullWidth
           />
 
           <TextField
             label="Unit"
             value={form.unit}
             onChange={(e) =>
-              setForm({ ...form, unit: e.target.value })
+              setForm({
+                ...form,
+                unit: e.target.value,
+              })
             }
+            fullWidth
           />
-
-          <TextField
+                    <TextField
             label="Purchase Price"
             type="number"
             value={form.purchase_price}
             onChange={(e) =>
-              setForm({ ...form, purchase_price: e.target.value })
+              setForm({
+                ...form,
+                purchase_price: e.target.value,
+              })
             }
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AttachMoneyIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
           />
 
           <TextField
@@ -316,15 +406,34 @@ export default function Products() {
             type="number"
             value={form.selling_price}
             onChange={(e) =>
-              setForm({ ...form, selling_price: e.target.value })
+              setForm({
+                ...form,
+                selling_price: e.target.value,
+              })
             }
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LocalOfferIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
           />
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate}>
-            Save
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+          >
+            Save Product
           </Button>
         </DialogActions>
       </Dialog>

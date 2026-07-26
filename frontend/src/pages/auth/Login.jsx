@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Button, TextField, Typography, Alert, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -7,18 +7,37 @@ import { loginUser } from "../../api/auth.api";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const ROLE_HOME = {
+  admin: "/admin",
+  manager: "/manager",
+  staff: "/staff",
+};
+
 export default function Login() {
   const navigate = useNavigate();
+  const emailRef = useRef(null);
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // If someone is already logged in and lands on /login (bookmark, back
+  // button, typing the URL directly), send them straight to their
+  // dashboard instead of showing the form again.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token && ROLE_HOME[role]) {
+      navigate(ROLE_HOME[role], { replace: true });
+    }
+  }, [navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
     if (fieldErrors[name]) setFieldErrors((f) => ({ ...f, [name]: "" }));
+    if (error) setError("");
   };
 
   const validate = () => {
@@ -37,16 +56,25 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const res = await loginUser(form);
+      const res = await loginUser({
+        email: form.email.trim(),
+        password: form.password,
+      });
 
       localStorage.setItem("token", res.access_token);
       localStorage.setItem("role", res.role);
 
-      if (res.role === "admin") navigate("/admin");
-      else if (res.role === "manager") navigate("/manager");
-      else navigate("/staff");
+      navigate(ROLE_HOME[res.role] || "/login", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || "Login failed. Please try again.");
+      if (!err.response) {
+        // No response at all -> network/server unreachable, not bad credentials
+        setError("Can't reach the server. Check your connection and try again.");
+      } else if (err.response.status === 401 || err.response.status === 400) {
+        setError("Incorrect email or password.");
+      } else {
+        setError(err.response?.data?.detail || "Login failed. Please try again.");
+      }
+      emailRef.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -82,6 +110,7 @@ export default function Login() {
           onChange={handleChange}
           fullWidth
           autoFocus
+          inputRef={emailRef}
           autoComplete="email"
           error={Boolean(fieldErrors.email)}
           helperText={fieldErrors.email}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Box,
@@ -11,24 +11,38 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  Chip,
+  CircularProgress,
+  InputAdornment,
 } from "@mui/material";
+
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import HomeIcon from "@mui/icons-material/Home";
 
 import {
   getCustomers,
-  createCustomer
+  createCustomer,
 } from "../../api/customer.api";
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const [open, setOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    address: ""
+    address: "",
   });
 
   useEffect(() => {
@@ -37,10 +51,16 @@ export default function Customers() {
 
   const loadCustomers = async () => {
     try {
+      setLoading(true);
+
       const data = await getCustomers();
-      setCustomers(data);
+
+      setCustomers(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
+      setCustomers([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,187 +72,468 @@ export default function Customers() {
         name: "",
         email: "",
         phone: "",
-        address: ""
+        address: "",
       });
 
       setOpen(false);
-      loadCustomers();
 
+      loadCustomers();
     } catch (err) {
       console.log(err);
+      alert("Failed to create customer");
     }
   };
 
+  const filteredCustomers = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
+
+    if (!keyword) return customers;
+
+    return customers.filter((c) =>
+      `${c.name} ${c.email} ${c.phone} ${c.address}`
+        .toLowerCase()
+        .includes(keyword)
+    );
+  }, [customers, search]);
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
 
       {/* HEADER */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          mb: 3
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
+          mb: 3,
         }}
       >
-        <Typography variant="h5">
-          Customers
-        </Typography>
+        <Box>
+          <Typography variant="h5" fontWeight={800}>
+            Customers
+          </Typography>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+          >
+            Manage customer information
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
+          startIcon={<AddIcon />}
           onClick={() => setOpen(true)}
         >
           Add Customer
         </Button>
       </Box>
 
-      {/* CUSTOMER LIST */}
-      {/* <Grid container spacing={3}>
-        {customers.map((c) => (
-          <Grid item xs={12} md={4} key={c.id}>
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
+      {/* KPI */}
+      <Grid
+        container
+        spacing={3}
+        sx={{ mb: 3 }}
+      >
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Total Customers
+              </Typography>
 
-                <Typography variant="h6">
-                  {c.name}
+              <Typography
+                variant="h4"
+                fontWeight={800}
+              >
+                {customers.length}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Search Results
+              </Typography>
+
+              <Typography
+                variant="h4"
+                fontWeight={800}
+              >
+                {filteredCustomers.length}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography color="text.secondary">
+                Status
+              </Typography>
+
+              <Chip
+                label="Active"
+                color="success"
+                sx={{ mt: 1 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* SEARCH */}
+      <TextField
+        fullWidth
+        placeholder="Search customer..."
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        sx={{ mb: 3 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
+            {/* ================= CUSTOMER TABLE ================= */}
+
+      {filteredCustomers.length === 0 ? (
+        <Card
+          sx={{
+            borderRadius: 3,
+            py: 6,
+            textAlign: "center",
+            bgcolor: "#fafafa",
+            border: "1px dashed #cbd5e1",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+            >
+              No Customers Found
+            </Typography>
+
+            <Typography
+              color="text.secondary"
+              sx={{ mt: 1, mb: 3 }}
+            >
+              {search
+                ? "No customer matches your search."
+                : "Start by adding your first customer."}
+            </Typography>
+
+            {!search && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpen(true)}
+              >
+                Add Customer
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Box
+          sx={{
+            overflowX: "auto",
+            borderRadius: 3,
+            border: "1px solid #e2e8f0",
+          }}
+        >
+          {/* TABLE HEADER */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1.3fr 1.5fr 1fr 2fr",
+              bgcolor: "#f8fafc",
+              fontWeight: 700,
+              minWidth: 900,
+              px: 3,
+              py: 2,
+            }}
+          >
+            <Box>Name</Box>
+            <Box>Email</Box>
+            <Box>Phone</Box>
+            <Box>Address</Box>
+          </Box>
+
+          {/* TABLE ROWS */}
+          {filteredCustomers.map((customer) => (
+            <Box
+              key={customer.id}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1.3fr 1.5fr 1fr 2fr",
+                minWidth: 900,
+                px: 3,
+                py: 2,
+                alignItems: "center",
+                borderTop: "1px solid #e2e8f0",
+                transition: ".2s",
+                "&:hover": {
+                  bgcolor: "#f8fafc",
+                },
+              }}
+            >
+              {/* NAME */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                }}
+              >
+                <PersonIcon color="primary" />
+
+                <Typography fontWeight={700}>
+                  {customer.name}
                 </Typography>
+              </Box>
+
+              {/* EMAIL */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <EmailIcon
+                  fontSize="small"
+                  color="action"
+                />
 
                 <Typography>
-                  {c.email}
+                  {customer.email}
                 </Typography>
+              </Box>
+
+              {/* PHONE */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <PhoneIcon
+                  fontSize="small"
+                  color="action"
+                />
 
                 <Typography>
-                  {c.phone}
+                  {customer.phone}
                 </Typography>
+              </Box>
+
+              {/* ADDRESS */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <HomeIcon
+                  fontSize="small"
+                  color="action"
+                />
 
                 <Typography
                   color="text.secondary"
-                  sx={{ mt: 1 }}
                 >
-                  {c.address}
+                  {customer.address}
                 </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      )}
 
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid> */}
-      {/* CUSTOMER TABLE STYLE */}
-<Box sx={{ mt: 2, overflowX: "auto" }}>
+      {/* ================= CREATE CUSTOMER DIALOG ================= */}
 
-  {/* HEADER */}
-  <Box
-    sx={{
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr 2fr",
-      fontWeight: 800,
-      p: 2,
-      bgcolor: "#f1f5f9",
-      borderRadius: 2,
-      minWidth: 800,
-    }}
-  >
-    <Box>Name</Box>
-    <Box>Email</Box>
-    <Box>Phone</Box>
-    <Box>Address</Box>
-  </Box>
-
-  {/* ROWS */}
-  {customers.map((c) => (
-    <Box
-      key={c.id}
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 2fr",
-        p: 2,
-        borderBottom: "1px solid #e2e8f0",
-        alignItems: "center",
-        minWidth: 800,
-        "&:hover": {
-          bgcolor: "#f8fafc",
-        },
-      }}
-    >
-      <Box sx={{ fontWeight: 700 }}>
-        {c.name}
-      </Box>
-
-      <Box>
-        {c.email}
-      </Box>
-
-      <Box>
-        {c.phone}
-      </Box>
-
-      <Box sx={{ color: "text.secondary" }}>
-        {c.address}
-      </Box>
-    </Box>
-  ))}
-</Box>
-
-      {/* CREATE CUSTOMER DIALOG */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
-          Create Customer
+          Add Customer
         </DialogTitle>
 
-        <DialogContent>
-
-          <TextField
+        <DialogContent
+          sx={{
+            display: "grid",
+            gap: 2,
+            mt: 1,
+          }}
+        >
+                <TextField
             fullWidth
-            margin="normal"
-            label="Name"
+            label="Customer Name"
             value={form.name}
             onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
             }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon />
+                </InputAdornment>
+              ),
+            }}
           />
 
           <TextField
             fullWidth
-            margin="normal"
-            label="Email"
+            label="Email Address"
+            type="email"
             value={form.email}
             onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
             }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailIcon />
+                </InputAdornment>
+              ),
+            }}
           />
 
           <TextField
             fullWidth
-            margin="normal"
-            label="Phone"
+            label="Phone Number"
             value={form.phone}
             onChange={(e) =>
-              setForm({ ...form, phone: e.target.value })
+              setForm({
+                ...form,
+                phone: e.target.value,
+              })
             }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIcon />
+                </InputAdornment>
+              ),
+            }}
           />
 
           <TextField
             fullWidth
-            margin="normal"
+            multiline
+            minRows={3}
             label="Address"
             value={form.address}
             onChange={(e) =>
-              setForm({ ...form, address: e.target.value })
+              setForm({
+                ...form,
+                address: e.target.value,
+              })
             }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <HomeIcon />
+                </InputAdornment>
+              ),
+            }}
           />
 
-        </DialogContent>
+          <Card
+            variant="outlined"
+            sx={{
+              bgcolor: "#f8fafc",
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+              >
+                Preview
+              </Typography>
 
-        <DialogActions>
+              <Typography variant="body2">
+                <strong>Name:</strong>{" "}
+                {form.name || "--"}
+              </Typography>
 
-          <Button onClick={() => setOpen(false)}>
+              <Typography variant="body2">
+                <strong>Email:</strong>{" "}
+                {form.email || "--"}
+              </Typography>
+
+              <Typography variant="body2">
+                <strong>Phone:</strong>{" "}
+                {form.phone || "--"}
+              </Typography>
+
+              <Typography variant="body2">
+                <strong>Address:</strong>{" "}
+                {form.address || "--"}
+              </Typography>
+            </CardContent>
+          </Card>
+                  </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
 
-          <Button variant="contained" onClick={handleCreate}>
-            Save
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            disabled={
+              !form.name.trim() ||
+              !form.email.trim() ||
+              !form.phone.trim() ||
+              !form.address.trim()
+            }
+          >
+            Save Customer
           </Button>
-
         </DialogActions>
       </Dialog>
 
