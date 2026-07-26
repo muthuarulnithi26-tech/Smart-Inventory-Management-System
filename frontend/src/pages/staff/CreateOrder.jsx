@@ -192,8 +192,6 @@ export default function OrderCreate() {
           </Grid>
         </CardContent>
       </Card>
-
-                  {/* ================= ORDER ITEMS HEADER ================= */} 
       <Box
         sx={{
           display: "flex",

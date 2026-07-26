@@ -105,8 +105,6 @@ export default function StaffManagement() {
     );
 
   }
-// ================= PART 2 START =================
-
   return (
 
     <Box sx={{ width: "100%" }}>
@@ -236,8 +234,6 @@ export default function StaffManagement() {
           <Box>Email</Box>
           <Box>Role</Box>
         </Box>
-// ================= PART 3 START =================
-
         {staff.map((user) => (
 
           <Box
@@ -322,8 +318,6 @@ export default function StaffManagement() {
               })
             }
           />
-// ================= PART 4 START =================
-
           <TextField
             label="Password"
             type="password"

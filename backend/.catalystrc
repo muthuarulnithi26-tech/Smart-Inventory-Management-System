@@ -10,10 +10,10 @@
   "projects": [
     {
       "idx": 1,
-      "id": "43494000000013048",
+      "id": "43494000000080050",
       "name": "Smart-Inventory-Management-System",
       "domain": {
-        "id": "50043521019",
+        "id": "50044161284",
         "name": "smart-inventory-management-system-60076025602.development"
       },
       "timezone": "Asia/Kolkata",
@@ -22,15 +22,7 @@
           "idx": 1,
           "id": "60076025602",
           "name": "Development",
-          "type": 3,
-          "env_status": "Active",
-          "project_details": {
-            "project_name": "Smart-Inventory-Management-System",
-            "id": "43494000000013048",
-            "project_type": "Live"
-          },
-          "is_default": true,
-          "action_required": false
+          "type": 3
         }
       ]
     }

@@ -57,7 +57,7 @@ const Inventory = () => {
     }
   };
 
-  // ---------------- FETCH MASTER DATA ----------------
+  
   const fetchData = async () => {
     try {
       const [warehouseRes, productRes] = await Promise.all([

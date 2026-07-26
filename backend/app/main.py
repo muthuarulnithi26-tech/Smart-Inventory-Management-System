@@ -27,7 +27,6 @@ from app.models.customer import Customer
 from app.models.order import Order
 from app.models.order_item import OrderItem
 # Create database tables
-
 def create_default_admin():
 
     db = SessionLocal()
@@ -60,20 +59,20 @@ def create_default_admin():
 
 # create_default_admin()
 
-
+import os
 app = FastAPI(
     title="Smart Inventory Management System",
     version="1.0.0"
 )
+if os.getenv("ENV", "local") == "local":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://<your-slate-app>.catalystserverless.<zone>.com"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 # AUTH
 app.include_router(auth_router)
 

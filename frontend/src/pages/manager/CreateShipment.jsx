@@ -128,7 +128,7 @@ export default function CreateShipment() {
 
 
   };
-  // ================= PART 2 START =================
+  
 
 // HEADER SECTION
 
@@ -340,7 +340,7 @@ return (
 
 
       </Grid>
-     // ================= PART 3 START =================
+    
       {/* Right Form */}
 
       <Grid item xs={12} md={8}>
@@ -563,9 +563,6 @@ return (
 
 
             </Grid>
-            // ================= PART 4 START =================
-
-
             {/* ACTION BUTTONS */}
 
             <Grid item xs={12}>
