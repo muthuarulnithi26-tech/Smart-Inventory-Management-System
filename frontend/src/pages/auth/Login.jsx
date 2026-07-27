@@ -26,7 +26,6 @@ import { useNavigate } from "react-router-dom";
 import PasswordField from "../../components/common/PasswordField";
 import { loginUser } from "../../api/auth.api";
 
-import truckImage from "../../assets/login-truck.jpg";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
